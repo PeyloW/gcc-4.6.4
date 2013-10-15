@@ -59,6 +59,11 @@ enum reg_class regno_reg_class[] =
 };
 
 
+#define DPRINTFA(...)
+//#define DPRINTFA printf
+#define DPRINTFB(...)
+//#define DPRINTFB printf
+
 /* The minimum number of integer registers that we want to save with the
    movem instruction.  Using two movel instructions instead of a single
    moveml is about 15% faster for the 68020 and 68030 at no expense in
@@ -489,7 +494,7 @@ m68k_find_selection (const struct m68k_target_selection **entry,
         	     const struct m68k_target_selection *table,
         	     const char *name)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   size_t i;
 
   for (i = 0; table[i].name; i++)
@@ -506,7 +511,7 @@ m68k_find_selection (const struct m68k_target_selection **entry,
 static bool
 m68k_handle_option (size_t code, const char *arg, int value)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   switch (code)
     {
     case OPT_march_:
@@ -595,7 +600,7 @@ m68k_handle_option (size_t code, const char *arg, int value)
 static void
 m68k_option_override (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   const struct m68k_target_selection *entry;
   unsigned long target_mask;
 
@@ -816,7 +821,7 @@ m68k_option_override (void)
 static void
 m68k_override_options_after_change (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (m68k_sched_cpu == CPU_UNKNOWN)
     {
       flag_schedule_insns = 0;
@@ -832,7 +837,7 @@ m68k_override_options_after_change (void)
 const char *
 m68k_cpp_cpu_ident (const char *prefix)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (!m68k_cpu_entry)
     return NULL;
   return concat ("__m", prefix, "_cpu_", m68k_cpu_entry->name, NULL);
@@ -845,7 +850,7 @@ m68k_cpp_cpu_ident (const char *prefix)
 const char *
 m68k_cpp_cpu_family (const char *prefix)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (!m68k_cpu_entry)
     return NULL;
   return concat ("__m", prefix, "_family_", m68k_cpu_entry->family, NULL);
@@ -861,7 +866,7 @@ m68k_cpp_cpu_family (const char *prefix)
 enum m68k_function_kind
 m68k_get_function_kind (tree func)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   tree a;
 
   gcc_assert (TREE_CODE (func) == FUNCTION_DECL);
@@ -889,7 +894,7 @@ m68k_handle_fndecl_attribute (tree *node, tree name,
         		      int flags ATTRIBUTE_UNUSED,
         		      bool *no_add_attrs)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (TREE_CODE (*node) != FUNCTION_DECL)
     {
       warning (OPT_Wattributes, "%qE attribute only applies to functions",
@@ -919,7 +924,7 @@ m68k_handle_fndecl_attribute (tree *node, tree name,
 static void
 m68k_validate_mutually_exclusive_attribute (char *attr1, char *attr2, tree *node, tree name)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (lookup_attribute (attr2, TYPE_ATTRIBUTES(*node)))
     error ("`%s` and `%s` are mutually exclusive", attr1, attr2);
 }
@@ -928,7 +933,7 @@ static tree
 m68k_handle_type_attribute (tree *node, tree name, tree args,
         		    int flags ATTRIBUTE_UNUSED, bool *no_add_attrs)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (TREE_CODE (*node) == FUNCTION_TYPE || TREE_CODE (*node) == METHOD_TYPE)
     {
       /* 'regparm' accepts one optional argument - number of registers in
@@ -978,7 +983,7 @@ m68k_handle_type_attribute (tree *node, tree name, tree args,
 static int
 m68k_comp_exclusive_type_attributes(char *name1, char *name2, tree type1, tree type2)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
 	return (!! lookup_attribute (name1, TYPE_ATTRIBUTES (type1)) !=
             !! lookup_attribute (name1, TYPE_ATTRIBUTES (type2))
          || !! lookup_attribute (name2, TYPE_ATTRIBUTES (type1)) !=
@@ -988,7 +993,7 @@ m68k_comp_exclusive_type_attributes(char *name1, char *name2, tree type1, tree t
 static int
 m68k_comp_type_attributes (tree type1, tree type2)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   /* Functions or methods are incompatible if they specify mutually
      exclusive ways of passing arguments.  */
   if (TREE_CODE (type1) == FUNCTION_TYPE || TREE_CODE (type1) == METHOD_TYPE)
@@ -1028,11 +1033,9 @@ m68k_comp_type_attributes (tree type1, tree type2)
 static enum m68k_call_abi
 m68k_function_type_abi (const_tree fntype)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
-  printf ("Line: %d\n", __LINE__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (! fntype)
     return FASTCALL_ABI; 
-  printf ("Line: %d\n", __LINE__);
   if (lookup_attribute ("stkparm", TYPE_ATTRIBUTES (fntype)))
     return STKPARM_ABI;
   else if (lookup_attribute ("fastcall", TYPE_ATTRIBUTES (fntype)))
@@ -1040,16 +1043,12 @@ m68k_function_type_abi (const_tree fntype)
   else
     {
       tree ratree = lookup_attribute ("regparm", TYPE_ATTRIBUTES (fntype));
-      printf ("Line: %d\n", __LINE__);
       if (ratree)
         {
-	        printf ("Line: %d\n", __LINE__);
           if (TREE_VALUE (ratree)
               && TREE_CODE (TREE_VALUE (ratree)) == TREE_LIST)
             {
-		    printf ("Line: %d\n", __LINE__);
               tree num_of_regs = TREE_VALUE (TREE_VALUE (ratree));
-	      printf ("Line: %d\n", __LINE__);
               return num_of_regs ? TREE_INT_CST_LOW (num_of_regs) :
             	      (m68k_abi ? m68k_abi : REGPARM_ABI);
             }
@@ -1062,7 +1061,7 @@ m68k_function_type_abi (const_tree fntype)
 static enum m68k_call_abi 
 m68k_function_abi (const_tree fndecl)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (! fndecl)
      return FASTCALL_ABI;
   return m68k_function_type_abi (TREE_TYPE (fndecl));
@@ -1076,7 +1075,7 @@ m68k_cfun_abi (void)
   enum m68k_call_abi abi = m68k_abi;
   if (cfun)
     abi = cfun->machine->abi;
-  printf ("Debug: %s = %d\n", __PRETTY_FUNCTION__, abi);
+  DPRINTFA("Debug: %s = %d\n", __PRETTY_FUNCTION__, abi);
   return abi;
 }
 
@@ -1084,18 +1083,18 @@ m68k_cfun_abi (void)
 void
 m68k_call_abi_override (const_tree fndecl)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
   if (fndecl == NULL_TREE)
     cfun->machine->abi = m68k_abi;
   else
     cfun->machine->abi = m68k_function_type_abi (TREE_TYPE (fndecl));
+  DPRINTFB("Debug: %s = %d\n", __PRETTY_FUNCTION__, cfun->machine->abi);
 }
 
 /*  We may need to re-do used regs and reg alloc order tables if ABI changes. */
 
 static enum m68k_call_abi m68k_abi_from_call_used_regs (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int i;
   for (i = 0; i < 8; i++)
     {
@@ -1112,7 +1111,7 @@ static void
 m68k_maybe_switch_abi (void)
 {
   int ri = m68k_abi_from_call_used_regs () != cfun->machine->abi;
-  printf ("Debug: %s\n = %s, %d", __PRETTY_FUNCTION__, ri ? "" : "switch ABI", m68k_cfun_abi ());
+  DPRINTFB("Debug: %s\n = %s, %d", __PRETTY_FUNCTION__, ri ? "" : "switch ABI", m68k_cfun_abi ());
   if (ri)
     reinit_regs ();
 }
@@ -1125,12 +1124,15 @@ void
 m68k_init_cumulative_args (CUMULATIVE_ARGS *cum,  /* Argument info to initialize */
 			      tree fntype)	/* tree ptr for function decl */
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFB("Debug: %s\n", __PRETTY_FUNCTION__);
   cum->last_arg_reg = -1;
   cum->regs_already_used = 0;
   cum->libcall = (fntype == 0);
   cum->abi = m68k_function_type_abi (fntype);
 
+//  cfun->machine->abi = cum->abi;
+//  m68k_maybe_switch_abi ();
+	
 #if ! defined (PCC_STATIC_STRUCT_RETURN) && defined (M68K_STRUCT_VALUE_REGNUM)
   /* If return value is a structure, and we pass the buffer address in a
      register, we can't use this register for our own purposes.
@@ -1140,7 +1142,7 @@ m68k_init_cumulative_args (CUMULATIVE_ARGS *cum,  /* Argument info to initialize
 #endif
   
 //  cfun->machine->abi = cum->abi;
-  printf("m68k_init_cumulative_args: %d, %d\n", m68k_cfun_abi (), m68k_set_abi);
+  DPRINTFB("m68k_init_cumulative_args: %d, %d\n", cum->abi, m68k_set_abi);
 }
 
 /* Define where to put the arguments to a function.
@@ -1157,7 +1159,7 @@ m68k_init_cumulative_args (CUMULATIVE_ARGS *cum,  /* Argument info to initialize
 rtx m68k_function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode,
         		      const_tree type, bool named)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (cum->abi != STKPARM_ABI)
     {
       int num_of_dregs = (cum->abi == FASTCALL_ABI) ? M68K_FASTCALL_DATA_PARM : cum->abi;
@@ -1211,11 +1213,9 @@ rtx m68k_function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode,
 
       if (cum->last_arg_reg != -1)
         {
-  printf("use reg: %d for: %p\n", cum->last_arg_reg, cum);
           return gen_rtx_REG (mode, cum->last_arg_reg);
         }
     }
-  printf("No reg for: %p\n", cum);
   return NULL_RTX;
 }
 
@@ -1223,7 +1223,7 @@ rtx m68k_function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode,
 static void
 m68k_compute_frame_layout (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int regno, saved;
   unsigned int mask;
   enum m68k_function_kind func_kind =
@@ -1280,14 +1280,14 @@ m68k_compute_frame_layout (void)
 bool
 m68k_can_eliminate (const int from ATTRIBUTE_UNUSED, const int to)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   return (to == STACK_POINTER_REGNUM ? ! frame_pointer_needed : true);
 }
 
 HOST_WIDE_INT
 m68k_initial_elimination_offset (int from, int to)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int argptr_offset;
   /* The arg pointer points 8 bytes before the start of the arguments,
      as defined by FIRST_PARM_OFFSET.  This makes it coincident with the
@@ -1319,7 +1319,7 @@ m68k_initial_elimination_offset (int from, int to)
 static bool
 m68k_save_reg (unsigned int regno, bool interrupt_handler)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (flag_pic && regno == PIC_REG)
     {
       if (crtl->saves_all_registers)
@@ -1387,7 +1387,7 @@ m68k_emit_movem (rtx base, HOST_WIDE_INT offset,
         	 unsigned int count, unsigned int regno,
         	 unsigned int mask, bool store_p, bool adjust_stack_p)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int i;
   rtx body, addr, src, operands[2];
   enum machine_mode mode;
@@ -1424,7 +1424,7 @@ m68k_emit_movem (rtx base, HOST_WIDE_INT offset,
 static void
 m68k_set_frame_related (rtx insn)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx body;
   int i;
 
@@ -1440,7 +1440,7 @@ m68k_set_frame_related (rtx insn)
 void
 m68k_expand_prologue (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   HOST_WIDE_INT fsize_with_regs;
   rtx limit, src, dest;
 
@@ -1594,7 +1594,7 @@ m68k_expand_prologue (void)
 bool
 m68k_use_return_insn (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (!reload_completed || frame_pointer_needed || get_frame_size () != 0)
     return false;
 
@@ -1613,7 +1613,7 @@ m68k_use_return_insn (void)
 void
 m68k_expand_epilogue (bool sibcall_p)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   HOST_WIDE_INT fsize, fsize_with_regs;
   bool big, restore_from_sp;
 
@@ -1785,7 +1785,7 @@ m68k_expand_epilogue (bool sibcall_p)
 int
 valid_dbcc_comparison_p_2 (rtx x, enum machine_mode mode ATTRIBUTE_UNUSED)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   switch (GET_CODE (x))
     {
       case EQ: case NE: case GTU: case LTU:
@@ -1805,7 +1805,7 @@ valid_dbcc_comparison_p_2 (rtx x, enum machine_mode mode ATTRIBUTE_UNUSED)
 int
 flags_in_68881 (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   /* We could add support for these in the future */
   return cc_status.flags & CC_IN_68881;
 }
@@ -1814,7 +1814,7 @@ flags_in_68881 (void)
 static bool
 m68k_reg_present_p (const_rtx parallel, unsigned int regno)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int i;
 
   if (REG_P (parallel) && REGNO (parallel) == regno)
@@ -1840,7 +1840,7 @@ m68k_reg_present_p (const_rtx parallel, unsigned int regno)
 static bool
 m68k_ok_for_sibcall_p (tree decl, tree exp)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   enum m68k_function_kind kind;
   tree type;
   
@@ -1901,7 +1901,7 @@ m68k_ok_for_sibcall_p (tree decl, tree exp)
 void
 m68k_function_arg_advance (CUMULATIVE_ARGS *cum)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
     if (cum->last_arg_reg != -1)
       {
         int count;
@@ -1917,7 +1917,7 @@ m68k_function_arg_advance (CUMULATIVE_ARGS *cum)
 rtx
 m68k_legitimize_call_address (rtx x)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   gcc_assert (MEM_P (x));
   if (call_operand (XEXP (x, 0), VOIDmode))
     return x;
@@ -1929,7 +1929,7 @@ m68k_legitimize_call_address (rtx x)
 rtx
 m68k_legitimize_sibcall_address (rtx x)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   gcc_assert (MEM_P (x));
   if (sibcall_operand (XEXP (x, 0), VOIDmode))
     return x;
@@ -1949,7 +1949,7 @@ m68k_legitimize_sibcall_address (rtx x)
 static rtx
 m68k_legitimize_address (rtx x, rtx oldx, enum machine_mode mode)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (m68k_tls_symbol_p (x))
     return m68k_legitimize_tls_address (x);
 
@@ -2028,7 +2028,7 @@ m68k_legitimize_address (rtx x, rtx oldx, enum machine_mode mode)
 void
 output_dbcc_and_branch (rtx *operands)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   switch (GET_CODE (operands[3]))
     {
       case EQ:
@@ -2094,7 +2094,7 @@ output_dbcc_and_branch (rtx *operands)
 const char *
 output_scc_di (rtx op, rtx operand1, rtx operand2, rtx dest)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx loperands[7];
   enum rtx_code op_code = GET_CODE (op);
 
@@ -2233,7 +2233,7 @@ output_scc_di (rtx op, rtx operand1, rtx operand2, rtx dest)
 const char *
 output_btst (rtx *operands, rtx countop, rtx dataop, rtx insn, int signpos)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   operands[0] = countop;
   operands[1] = dataop;
 
@@ -2297,7 +2297,7 @@ output_btst (rtx *operands, rtx countop, rtx dataop, rtx insn, int signpos)
 bool
 m68k_legitimate_base_reg_p (rtx x, bool strict_p)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   /* Allow SUBREG everywhere we allow REG.  This results in better code.  */
   if (!strict_p && GET_CODE (x) == SUBREG)
     x = SUBREG_REG (x);
@@ -2314,7 +2314,7 @@ m68k_legitimate_base_reg_p (rtx x, bool strict_p)
 bool
 m68k_legitimate_index_reg_p (rtx x, bool strict_p)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (!strict_p && GET_CODE (x) == SUBREG)
     x = SUBREG_REG (x);
 
@@ -2331,7 +2331,7 @@ m68k_legitimate_index_reg_p (rtx x, bool strict_p)
 static bool
 m68k_decompose_index (rtx x, bool strict_p, struct m68k_address *address)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int scale;
 
   /* Check for a scale factor.  */
@@ -2369,7 +2369,7 @@ m68k_decompose_index (rtx x, bool strict_p, struct m68k_address *address)
 bool
 m68k_illegitimate_symbolic_constant_p (rtx x)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx base, offset;
 
   if (M68K_OFFSETS_MUST_BE_WITHIN_SECTIONS_P)
@@ -2389,7 +2389,7 @@ m68k_illegitimate_symbolic_constant_p (rtx x)
 static bool
 m68k_legitimate_constant_address_p (rtx x, unsigned int reach, bool strict_p)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx base, offset;
 
   if (!CONSTANT_ADDRESS_P (x))
@@ -2417,7 +2417,7 @@ m68k_legitimate_constant_address_p (rtx x, unsigned int reach, bool strict_p)
 static bool
 m68k_jump_table_ref_p (rtx x)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (GET_CODE (x) != LABEL_REF)
     return false;
 
@@ -2437,7 +2437,7 @@ static bool
 m68k_decompose_address (enum machine_mode mode, rtx x,
         		bool strict_p, struct m68k_address *address)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   unsigned int reach;
 
   memset (address, 0, sizeof (*address));
@@ -2585,7 +2585,7 @@ m68k_decompose_address (enum machine_mode mode, rtx x,
 bool
 m68k_legitimate_address_p (enum machine_mode mode, rtx x, bool strict_p)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   struct m68k_address address;
 
   return m68k_decompose_address (mode, x, strict_p, &address);
@@ -2597,7 +2597,7 @@ m68k_legitimate_address_p (enum machine_mode mode, rtx x, bool strict_p)
 static bool
 m68k_legitimate_mem_p (rtx x, struct m68k_address *address)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   return (MEM_P (x)
           && m68k_decompose_address (GET_MODE (x), XEXP (x, 0),
         			     reload_in_progress || reload_completed,
@@ -2610,7 +2610,7 @@ m68k_legitimate_mem_p (rtx x, struct m68k_address *address)
 bool
 m68k_matches_q_p (rtx x)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   struct m68k_address address;
 
   return (m68k_legitimate_mem_p (x, &address)
@@ -2626,7 +2626,7 @@ m68k_matches_q_p (rtx x)
 bool
 m68k_matches_u_p (rtx x)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   struct m68k_address address;
 
   return (m68k_legitimate_mem_p (x, &address)
@@ -2641,7 +2641,7 @@ m68k_matches_u_p (rtx x)
 static rtx
 m68k_get_gp (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (pic_offset_table_rtx == NULL_RTX)
     pic_offset_table_rtx = gen_rtx_REG (Pmode, PIC_REG);
 
@@ -2664,7 +2664,7 @@ enum m68k_reloc { RELOC_GOT, RELOC_TLSGD, RELOC_TLSLDM, RELOC_TLSLDO,
 static rtx
 m68k_wrap_symbol (rtx x, enum m68k_reloc reloc, rtx base_reg, rtx temp_reg)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   bool use_x_p;
 
   use_x_p = (base_reg == pic_offset_table_rtx) ? TARGET_XGOT : TARGET_XTLS;
@@ -2711,7 +2711,7 @@ static rtx
 m68k_unwrap_symbol_1 (rtx orig, bool unwrap_reloc32_p,
         	      enum m68k_reloc *reloc_ptr)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (GET_CODE (orig) == CONST)
     {
       rtx x;
@@ -2759,7 +2759,7 @@ m68k_unwrap_symbol_1 (rtx orig, bool unwrap_reloc32_p,
 rtx
 m68k_unwrap_symbol (rtx orig, bool unwrap_reloc32_p)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   return m68k_unwrap_symbol_1 (orig, unwrap_reloc32_p, NULL);
 }
 
@@ -2768,7 +2768,7 @@ m68k_unwrap_symbol (rtx orig, bool unwrap_reloc32_p)
 static int
 m68k_final_prescan_insn_1 (rtx *x_ptr, void *data ATTRIBUTE_UNUSED)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx x = *x_ptr;
 
   if (m68k_unwrap_symbol (x, true) != x)
@@ -2813,7 +2813,7 @@ void
 m68k_final_prescan_insn (rtx insn ATTRIBUTE_UNUSED,
         		 rtx *operands, int n_operands)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int i;
 
   /* Combine and, possibly, other optimizations may do good job
@@ -2849,7 +2849,7 @@ m68k_final_prescan_insn (rtx insn ATTRIBUTE_UNUSED,
 static rtx
 m68k_move_to_reg (rtx x, rtx orig, rtx reg)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx insn;
 
   if (reg == NULL_RTX)
@@ -2872,7 +2872,7 @@ m68k_move_to_reg (rtx x, rtx orig, rtx reg)
 static rtx
 m68k_wrap_symbol_into_got_ref (rtx x, enum m68k_reloc reloc, rtx temp_reg)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   x = m68k_wrap_symbol (x, reloc, m68k_get_gp (), temp_reg);
 
   x = gen_rtx_MEM (Pmode, x);
@@ -2925,7 +2925,7 @@ rtx
 legitimize_pic_address (rtx orig, enum machine_mode mode ATTRIBUTE_UNUSED,
         	        rtx reg)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx pic_ref = orig;
 
   /* First handle a simple SYMBOL_REF or LABEL_REF */
@@ -2970,7 +2970,7 @@ static GTY(()) rtx m68k_tls_get_addr;
 static rtx
 m68k_get_tls_get_addr (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (m68k_tls_get_addr == NULL_RTX)
     m68k_tls_get_addr = init_one_libfunc ("__tls_get_addr");
 
@@ -2989,7 +2989,7 @@ static bool m68k_libcall_value_in_a0_p = false;
 static rtx
 m68k_call_tls_get_addr (rtx x, rtx eqv, enum m68k_reloc reloc)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx a0;
   rtx insns;
   rtx dest;
@@ -3037,7 +3037,7 @@ static GTY(()) rtx m68k_read_tp;
 static rtx
 m68k_get_m68k_read_tp (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (m68k_read_tp == NULL_RTX)
     m68k_read_tp = init_one_libfunc ("__m68k_read_tp");
 
@@ -3050,7 +3050,7 @@ m68k_get_m68k_read_tp (void)
 static rtx 
 m68k_call_m68k_read_tp (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx a0;
   rtx eqv;
   rtx insns;
@@ -3090,7 +3090,7 @@ m68k_call_m68k_read_tp (void)
 rtx
 m68k_legitimize_tls_address (rtx orig)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   switch (SYMBOL_REF_TLS_MODEL (orig))
     {
     case TLS_MODEL_GLOBAL_DYNAMIC:
@@ -3164,7 +3164,7 @@ m68k_legitimize_tls_address (rtx orig)
 static bool
 m68k_tls_symbol_p (rtx x)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (!TARGET_HAVE_TLS)
     return false;
 
@@ -3179,7 +3179,7 @@ m68k_tls_symbol_p (rtx x)
 static int
 m68k_tls_reference_p_1 (rtx *x_ptr, void *data ATTRIBUTE_UNUSED)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   /* Note: this is not the same as m68k_tls_symbol_p.  */
   if (GET_CODE (*x_ptr) == SYMBOL_REF)
     return SYMBOL_REF_TLS_MODEL (*x_ptr) != 0 ? 1 : 0;
@@ -3198,7 +3198,7 @@ m68k_tls_reference_p_1 (rtx *x_ptr, void *data ATTRIBUTE_UNUSED)
 bool
 m68k_tls_reference_p (rtx x, bool legitimate_p)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (!TARGET_HAVE_TLS)
     return false;
 
@@ -3222,7 +3222,7 @@ m68k_tls_reference_p (rtx x, bool legitimate_p)
 M68K_CONST_METHOD
 m68k_const_method (HOST_WIDE_INT i)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   unsigned u;
 
   if (USE_MOVQ (i))
@@ -3267,7 +3267,7 @@ m68k_const_method (HOST_WIDE_INT i)
 static int
 const_int_cost (HOST_WIDE_INT i)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   switch (m68k_const_method (i))
     {
     case MOVQ:
@@ -3292,7 +3292,7 @@ static bool
 m68k_rtx_costs (rtx x, int code, int outer_code, int *total,
         	bool speed ATTRIBUTE_UNUSED)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   switch (code)
     {
     case CONST_INT:
@@ -3441,7 +3441,7 @@ m68k_rtx_costs (rtx x, int code, int outer_code, int *total,
 static const char *
 output_move_const_into_data_reg (rtx *operands)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   HOST_WIDE_INT i;
 
   i = INTVAL (operands[1]);
@@ -3483,7 +3483,7 @@ output_move_const_into_data_reg (rtx *operands)
 bool
 valid_mov3q_const (HOST_WIDE_INT i)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   return TARGET_ISAB && (i == -1 || IN_RANGE (i, 1, 7));
 }
 
@@ -3493,7 +3493,7 @@ valid_mov3q_const (HOST_WIDE_INT i)
 static const char *
 output_move_simode_const (rtx *operands)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx dest;
   HOST_WIDE_INT src;
 
@@ -3532,7 +3532,7 @@ output_move_simode_const (rtx *operands)
 const char *
 output_move_simode (rtx *operands)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (GET_CODE (operands[1]) == CONST_INT)
     return output_move_simode_const (operands);
   else if ((GET_CODE (operands[1]) == SYMBOL_REF
@@ -3549,7 +3549,7 @@ output_move_simode (rtx *operands)
 const char *
 output_move_himode (rtx *operands)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
  if (GET_CODE (operands[1]) == CONST_INT)
     {
       if (operands[1] == const0_rtx
@@ -3579,7 +3579,7 @@ output_move_himode (rtx *operands)
 const char *
 output_move_qimode (rtx *operands)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   /* 68k family always modifies the stack pointer by at least 2, even for
      byte pushes.  The 5200 (ColdFire) does not do this.  */
   
@@ -3624,7 +3624,7 @@ output_move_qimode (rtx *operands)
 const char *
 output_move_stricthi (rtx *operands)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (operands[1] == const0_rtx
       /* clr insns on 68000 read before writing.  */
       && ((TARGET_68010 || TARGET_COLDFIRE)
@@ -3636,7 +3636,7 @@ output_move_stricthi (rtx *operands)
 const char *
 output_move_strictqi (rtx *operands)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (operands[1] == const0_rtx
       /* clr insns on 68000 read before writing.  */
       && ((TARGET_68010 || TARGET_COLDFIRE)
@@ -3651,7 +3651,7 @@ output_move_strictqi (rtx *operands)
 static const char *
 singlemove_string (rtx *operands)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (GET_CODE (operands[1]) == CONST_INT)
     return output_move_simode_const (operands);
   return "move%.l %1,%0";
@@ -3671,7 +3671,7 @@ handle_move_double (rtx operands[2],
         	    void (*handle_compadr) (rtx [2]),
         	    void (*handle_movsi) (rtx [2]))
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   enum
     {
       REGOP, OFFSOP, MEMOP, PUSHOP, POPOP, CNSTOP, RNDOP
@@ -4002,7 +4002,7 @@ handle_move_double (rtx operands[2],
 static void
 output_reg_adjust (rtx reg, int n)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   const char *s;
 
   gcc_assert (GET_MODE (reg) == SImode
@@ -4046,7 +4046,7 @@ output_reg_adjust (rtx reg, int n)
 static void
 emit_reg_adjust (rtx reg1, int n)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx reg2;
 
   gcc_assert (GET_MODE (reg1) == SImode
@@ -4067,7 +4067,7 @@ emit_reg_adjust (rtx reg1, int n)
 static void
 output_compadr (rtx operands[2])
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   output_asm_insn ("lea %a1,%0", operands);
 }
 
@@ -4076,7 +4076,7 @@ output_compadr (rtx operands[2])
 static void
 output_movsi (rtx operands[2])
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   output_asm_insn (singlemove_string (operands), operands);
 }
 
@@ -4084,7 +4084,7 @@ output_movsi (rtx operands[2])
 static rtx
 copy_operand (rtx op, enum machine_mode mode)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   /* ??? This looks really ugly.  There must be a better way
      to change a mode on the operand.  */
   if (GET_MODE (op) != VOIDmode)
@@ -4105,7 +4105,7 @@ copy_operand (rtx op, enum machine_mode mode)
 static void
 emit_movsi (rtx operands[2])
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   operands[0] = copy_operand (operands[0], SImode);
   operands[1] = copy_operand (operands[1], SImode);
 
@@ -4117,7 +4117,7 @@ emit_movsi (rtx operands[2])
 const char *
 output_move_double (rtx *operands)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   handle_move_double (operands,
         	      output_reg_adjust, output_compadr, output_movsi);
 
@@ -4129,7 +4129,7 @@ output_move_double (rtx *operands)
 void
 m68k_emit_move_double (rtx operands[2])
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   handle_move_double (operands, emit_reg_adjust, emit_movsi, emit_movsi);
 }
 
@@ -4139,7 +4139,7 @@ m68k_emit_move_double (rtx operands[2])
 static rtx
 force_mode (enum machine_mode mode, rtx orig)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (mode == GET_MODE (orig))
     return orig;
 
@@ -4152,7 +4152,7 @@ force_mode (enum machine_mode mode, rtx orig)
 static int
 fp_reg_operand (rtx op, enum machine_mode mode ATTRIBUTE_UNUSED)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   return reg_renumber && FP_REG_P (op);
 }
 
@@ -4169,7 +4169,7 @@ fp_reg_operand (rtx op, enum machine_mode mode ATTRIBUTE_UNUSED)
 int
 emit_move_sequence (rtx *operands, enum machine_mode mode, rtx scratch_reg)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   register rtx operand0 = operands[0];
   register rtx operand1 = operands[1];
   register rtx tem;
@@ -4330,7 +4330,7 @@ emit_move_sequence (rtx *operands, enum machine_mode mode, rtx scratch_reg)
 void
 split_di (rtx operands[], int num, rtx lo_half[], rtx hi_half[])
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   while (num--)
     {
       rtx op = operands[num];
@@ -4360,7 +4360,7 @@ split_di (rtx operands[], int num, rtx lo_half[], rtx hi_half[])
 static void
 m68k_split_offset (rtx x, rtx *base, HOST_WIDE_INT *offset)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   *offset = 0;
   if (GET_CODE (x) == PLUS && GET_CODE (XEXP (x, 1)) == CONST_INT)
     {
@@ -4385,7 +4385,7 @@ bool
 m68k_movem_pattern_p (rtx pattern, rtx automod_base,
         	      HOST_WIDE_INT automod_offset, bool store_p)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx base, mem_base, set, mem, reg, last_reg;
   HOST_WIDE_INT offset, mem_offset;
   int i, first, len;
@@ -4496,7 +4496,7 @@ const char *
 m68k_output_movem (rtx *operands, rtx pattern,
         	   HOST_WIDE_INT automod_offset, bool store_p)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   unsigned int mask;
   int i, first;
 
@@ -4561,7 +4561,7 @@ m68k_output_movem (rtx *operands, rtx pattern,
 static rtx
 find_addr_reg (rtx addr)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   while (GET_CODE (addr) == PLUS)
     {
       if (GET_CODE (XEXP (addr, 0)) == REG)
@@ -4584,7 +4584,7 @@ find_addr_reg (rtx addr)
 const char *
 output_addsi3 (rtx *operands)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (! operands_match_p (operands[0], operands[1]))
     {
       if (!ADDRESS_REG_P (operands[1]))
@@ -4658,7 +4658,7 @@ output_addsi3 (rtx *operands)
 void
 notice_update_cc (rtx exp, rtx insn)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (GET_CODE (exp) == SET)
     {
       if (GET_CODE (SET_SRC (exp)) == CALL)
@@ -4763,7 +4763,7 @@ notice_update_cc (rtx exp, rtx insn)
 const char *
 output_move_const_double (rtx *operands)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int code = standard_68881_constant_p (operands[1]);
 
   if (code != 0)
@@ -4779,7 +4779,7 @@ output_move_const_double (rtx *operands)
 const char *
 output_move_const_single (rtx *operands)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int code = standard_68881_constant_p (operands[1]);
 
   if (code != 0)
@@ -4829,7 +4829,7 @@ REAL_VALUE_TYPE values_68881[7];
 void
 init_68881_table (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int i;
   REAL_VALUE_TYPE r;
   enum machine_mode mode;
@@ -4848,7 +4848,7 @@ init_68881_table (void)
 int
 standard_68881_constant_p (rtx x)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   REAL_VALUE_TYPE r;
   int i;
 
@@ -4887,7 +4887,7 @@ standard_68881_constant_p (rtx x)
 int
 floating_exact_log2 (rtx x)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   REAL_VALUE_TYPE r, r1;
   int exp;
 
@@ -4952,7 +4952,7 @@ floating_exact_log2 (rtx x)
 void
 print_operand (FILE *file, rtx op, int letter)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (letter == '.')
     {
       if (MOTOROLA)
@@ -5050,7 +5050,7 @@ print_operand (FILE *file, rtx op, int letter)
 static const char *
 m68k_get_reloc_decoration (enum m68k_reloc reloc)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   /* To my knowledge, !MOTOROLA assemblers don't support TLS.  */
   gcc_assert (MOTOROLA || reloc == RELOC_GOT);
 
@@ -5105,7 +5105,7 @@ m68k_get_reloc_decoration (enum m68k_reloc reloc)
 bool
 m68k_output_addr_const_extra (FILE *file, rtx x)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (GET_CODE (x) == UNSPEC)
     {
       switch (XINT (x, 1))
@@ -5130,7 +5130,7 @@ m68k_output_addr_const_extra (FILE *file, rtx x)
 static void
 m68k_output_dwarf_dtprel (FILE *file, int size, rtx x)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   gcc_assert (size == 4);
   fputs ("\t.long\t", file);
   output_addr_const (file, x);
@@ -5144,7 +5144,7 @@ m68k_output_dwarf_dtprel (FILE *file, int size, rtx x)
 static rtx
 m68k_delegitimize_address (rtx orig_x)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx x;
   struct m68k_address addr;
   rtx unspec;
@@ -5208,7 +5208,7 @@ m68k_delegitimize_address (rtx orig_x)
 void
 print_operand_address (FILE *file, rtx addr)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   struct m68k_address address;
 
   if (!m68k_decompose_address (QImode, addr, true, &address))
@@ -5338,7 +5338,7 @@ bool
 strict_low_part_peephole_ok (enum machine_mode mode, rtx first_insn,
                              rtx target)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx p = first_insn;
 
   while ((p = PREV_INSN (p)))
@@ -5445,7 +5445,7 @@ strict_low_part_peephole_ok (enum machine_mode mode, rtx first_insn,
 const char *
 output_andsi3 (rtx *operands)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int logval;
   if (GET_CODE (operands[2]) == CONST_INT
       && (INTVAL (operands[2]) | 0xffff) == -1
@@ -5484,7 +5484,7 @@ output_andsi3 (rtx *operands)
 const char *
 output_iorsi3 (rtx *operands)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   register int logval;
   if (GET_CODE (operands[2]) == CONST_INT
       && INTVAL (operands[2]) >> 16 == 0
@@ -5521,7 +5521,7 @@ output_iorsi3 (rtx *operands)
 const char *
 output_xorsi3 (rtx *operands)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   register int logval;
   if (GET_CODE (operands[2]) == CONST_INT
       && INTVAL (operands[2]) >> 16 == 0
@@ -5560,7 +5560,7 @@ output_xorsi3 (rtx *operands)
 const char *
 output_call (rtx x)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (symbolic_operand (x, VOIDmode))
     return m68k_symbolic_call;
   else
@@ -5572,7 +5572,7 @@ output_call (rtx x)
 const char *
 output_sibcall (rtx x)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (symbolic_operand (x, VOIDmode))
     return m68k_symbolic_jump;
   else
@@ -5584,7 +5584,7 @@ m68k_output_mi_thunk (FILE *file, tree thunk ATTRIBUTE_UNUSED,
         	      HOST_WIDE_INT delta, HOST_WIDE_INT vcall_offset,
         	      tree function)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx this_slot, offset, addr, mem, insn, tmp;
 
   /* Avoid clobbering the struct value reg by using the
@@ -5677,7 +5677,7 @@ static rtx
 m68k_struct_value_rtx (tree fntype ATTRIBUTE_UNUSED,
         	       int incoming ATTRIBUTE_UNUSED)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   return gen_rtx_REG (Pmode, M68K_STRUCT_VALUE_REGNUM);
 }
 
@@ -5686,7 +5686,7 @@ int
 m68k_hard_regno_rename_ok (unsigned int old_reg ATTRIBUTE_UNUSED,
         		   unsigned int new_reg)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
 
   /* Interrupt functions can only use registers that have already been
      saved by the prologue, even if they would normally be
@@ -5707,7 +5707,7 @@ m68k_hard_regno_rename_ok (unsigned int old_reg ATTRIBUTE_UNUSED,
 bool
 m68k_regno_mode_ok (int regno, enum machine_mode mode)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (DATA_REGNO_P (regno))
     {
       /* Data Registers, can hold aggregate if fits in.  */
@@ -5737,7 +5737,7 @@ enum reg_class
 m68k_secondary_reload_class (enum reg_class rclass,
         		     enum machine_mode mode, rtx x)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int regno;
 
   regno = true_regnum (x);
@@ -5764,7 +5764,7 @@ m68k_secondary_reload_class (enum reg_class rclass,
 enum reg_class
 m68k_preferred_reload_class (rtx x, enum reg_class rclass)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   enum reg_class secondary_class;
 
   /* If RCLASS might need a secondary reload, try restricting it to
@@ -5802,7 +5802,7 @@ m68k_preferred_reload_class (rtx x, enum reg_class rclass)
 rtx
 m68k_libcall_value (enum machine_mode mode)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   switch (mode) {
   case SFmode:
   case DFmode:
@@ -5823,7 +5823,7 @@ m68k_libcall_value (enum machine_mode mode)
 rtx
 m68k_function_value (const_tree valtype, const_tree func ATTRIBUTE_UNUSED)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   enum machine_mode mode;
 
   mode = TYPE_MODE (valtype);
@@ -5867,7 +5867,7 @@ m68k_function_value (const_tree valtype, const_tree func ATTRIBUTE_UNUSED)
 static bool
 m68k_return_in_memory (const_tree type, const_tree fntype ATTRIBUTE_UNUSED)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   enum machine_mode mode = TYPE_MODE (type);
 
   if (mode == BLKmode)
@@ -5932,7 +5932,7 @@ enum attr_op_type
 static enum attr_op_type
 sched_address_type (enum machine_mode mode, rtx addr_rtx)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   struct m68k_address address;
 
   if (symbolic_operand (addr_rtx, VOIDmode))
@@ -5966,7 +5966,7 @@ sched_address_type (enum machine_mode mode, rtx addr_rtx)
 static rtx
 sched_get_operand (rtx insn, bool opx_p)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int i;
 
   if (recog_memoized (insn) < 0)
@@ -5990,7 +5990,7 @@ sched_get_operand (rtx insn, bool opx_p)
 static enum attr_op_type
 sched_attr_op_type (rtx insn, bool opx_p, bool address_p)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx op;
 
   op = sched_get_operand (insn, opx_p);
@@ -6110,7 +6110,7 @@ sched_attr_op_type (rtx insn, bool opx_p, bool address_p)
 enum attr_opx_type
 m68k_sched_attr_opx_type (rtx insn, int address_p)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   switch (sched_attr_op_type (insn, true, address_p != 0))
     {
     case OP_TYPE_RN:
@@ -6154,7 +6154,7 @@ m68k_sched_attr_opx_type (rtx insn, int address_p)
 enum attr_opy_type
 m68k_sched_attr_opy_type (rtx insn, int address_p)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   switch (sched_attr_op_type (insn, false, address_p != 0))
     {
     case OP_TYPE_RN:
@@ -6196,7 +6196,7 @@ m68k_sched_attr_opy_type (rtx insn, int address_p)
 static int
 sched_get_attr_size_int (rtx insn)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int size;
 
   switch (get_attr_type (insn))
@@ -6282,7 +6282,7 @@ sched_get_attr_size_int (rtx insn)
 enum attr_size
 m68k_sched_attr_size (rtx insn)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   switch (sched_get_attr_size_int (insn))
     {
     case 1:
@@ -6304,7 +6304,7 @@ m68k_sched_attr_size (rtx insn)
 static enum attr_op_type
 sched_get_opxy_mem_type (rtx insn, bool opx_p)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (opx_p)
     {
       switch (get_attr_opx_type (insn))
@@ -6361,7 +6361,7 @@ sched_get_opxy_mem_type (rtx insn, bool opx_p)
 enum attr_op_mem
 m68k_sched_attr_op_mem (rtx insn)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   enum attr_op_type opx;
   enum attr_op_type opy;
 
@@ -6468,7 +6468,7 @@ static enum attr_type *sched_branch_type;
 enum attr_type
 m68k_sched_branch_type (rtx insn)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   enum attr_type type;
 
   type = sched_branch_type[INSN_UID (insn)];
@@ -6503,7 +6503,7 @@ static int
 m68k_sched_adjust_cost (rtx insn, rtx link ATTRIBUTE_UNUSED, rtx def_insn,
         		int cost)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int delay;
 
   if (recog_memoized (def_insn) < 0
@@ -6548,7 +6548,7 @@ m68k_sched_adjust_cost (rtx insn, rtx link ATTRIBUTE_UNUSED, rtx def_insn,
 static int
 m68k_sched_issue_rate (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   switch (m68k_sched_cpu)
     {
     case CPU_CFV1:
@@ -6615,7 +6615,7 @@ m68k_sched_variable_issue (FILE *sched_dump ATTRIBUTE_UNUSED,
         		   int sched_verbose ATTRIBUTE_UNUSED,
         		   rtx insn, int can_issue_more)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int insn_size;
 
   if (recog_memoized (insn) >= 0 && get_attr_type (insn) != TYPE_IGNORE)
@@ -6686,7 +6686,7 @@ m68k_sched_variable_issue (FILE *sched_dump ATTRIBUTE_UNUSED,
 static int
 m68k_sched_first_cycle_multipass_dfa_lookahead (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   return m68k_sched_issue_rate () - 1;
 }
 
@@ -6698,7 +6698,7 @@ m68k_sched_md_init_global (FILE *sched_dump ATTRIBUTE_UNUSED,
         		   int sched_verbose ATTRIBUTE_UNUSED,
         		   int n_insns ATTRIBUTE_UNUSED)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   /* Init branch types.  */
   {
     rtx insn;
@@ -6783,7 +6783,7 @@ static void
 m68k_sched_md_finish_global (FILE *dump ATTRIBUTE_UNUSED,
         		     int verbose ATTRIBUTE_UNUSED)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   sched_ib.insn = NULL;
 
   free (sched_adjust_cost_state);
@@ -6808,7 +6808,7 @@ m68k_sched_md_init (FILE *sched_dump ATTRIBUTE_UNUSED,
         	    int sched_verbose ATTRIBUTE_UNUSED,
         	    int n_insns ATTRIBUTE_UNUSED)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   switch (m68k_sched_cpu)
     {
     case CPU_CFV1:
@@ -6845,7 +6845,7 @@ m68k_sched_md_init (FILE *sched_dump ATTRIBUTE_UNUSED,
 static void
 m68k_sched_dfa_pre_advance_cycle (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   if (!sched_ib.enabled_p)
     return;
 
@@ -6866,7 +6866,7 @@ m68k_sched_dfa_pre_advance_cycle (void)
 static void
 m68k_sched_dfa_post_advance_cycle (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int i;
 
   if (!sched_ib.enabled_p)
@@ -6888,7 +6888,7 @@ m68k_sched_dfa_post_advance_cycle (void)
 static rtx
 sched_get_reg_operand (rtx insn, bool opx_p)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx op = NULL;
 
   if (opx_p)
@@ -6922,7 +6922,7 @@ sched_get_reg_operand (rtx insn, bool opx_p)
 static bool
 sched_mem_operand_p (rtx insn, bool opx_p)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   switch (sched_get_opxy_mem_type (insn, opx_p))
     {
     case OP_TYPE_MEM1:
@@ -6939,7 +6939,7 @@ sched_mem_operand_p (rtx insn, bool opx_p)
 static rtx
 sched_get_mem_operand (rtx insn, bool must_read_p, bool must_write_p)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   bool opx_p;
   bool opy_p;
 
@@ -6973,7 +6973,7 @@ sched_get_mem_operand (rtx insn, bool must_read_p, bool must_write_p)
 int
 m68k_sched_address_bypass_p (rtx pro, rtx con)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx pro_x;
   rtx con_mem_read;
 
@@ -6996,7 +6996,7 @@ m68k_sched_address_bypass_p (rtx pro, rtx con)
 static int
 sched_get_indexed_address_scale (rtx pro, rtx con)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx reg;
   rtx mem;
   struct m68k_address address;
@@ -7026,7 +7026,7 @@ sched_get_indexed_address_scale (rtx pro, rtx con)
 int
 m68k_sched_indexed_address_bypass_p (rtx pro, rtx con)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   gcc_assert (sched_cfv4_bypass_data.pro == NULL
               && sched_cfv4_bypass_data.con == NULL
               && sched_cfv4_bypass_data.scale == 0);
@@ -7058,7 +7058,7 @@ m68k_sched_indexed_address_bypass_p (rtx pro, rtx con)
 static void
 m68k_trampoline_init (rtx m_tramp, tree fndecl, rtx chain_value)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   rtx fnaddr = XEXP (DECL_RTL (fndecl), 0);
   rtx mem;
 
@@ -7089,7 +7089,7 @@ m68k_trampoline_init (rtx m_tramp, tree fndecl, rtx chain_value)
 static int
 m68k_return_pops_args (tree fundecl, tree funtype, int size)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   return ((TARGET_RTD
            && (!fundecl
                || TREE_CODE (fundecl) != IDENTIFIER_NODE)
@@ -7106,7 +7106,7 @@ static GTY(()) tree m68k_previous_fndecl;
 static void
 m68k_set_current_function (tree fndecl)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   /* Only change the context if the function changes.  This hook is called
      several times in the course of compiling a function, and we don't want to
      slow things down too much or call target_reinit when it isn't safe.  */
@@ -7145,7 +7145,7 @@ m68k_set_current_function (tree fndecl)
 void
 m68k_order_regs_for_local_alloc (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int i;
   int pos = 0;
   for (i = 0; i < 16; i ++)
@@ -7167,10 +7167,9 @@ m68k_order_regs_for_local_alloc (void)
 static void
 m68k_conditional_register_usage (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   int i;
   enum m68k_call_abi abi = m68k_cfun_abi ();
-  printf("m68k_conditional_register_usage: %d, %d\n", m68k_cfun_abi (), m68k_set_abi);
   int num_of_dregs = ((abi == FASTCALL_ABI) ? M68K_FASTCALL_DATA_PARM : MAX(2, abi));
   int num_of_aregs = ((abi == FASTCALL_ABI) ? M68K_FASTCALL_ADDR_PARM : MAX(2, abi));;
   for (i = 0; i < 8; i++)
@@ -7195,13 +7194,13 @@ m68k_conditional_register_usage (void)
           fixed_regs[i] = call_used_regs[i] = 1;
     }
     m68k_set_abi = abi;
+    DPRINTFA("Debug: %s = %d\n", __PRETTY_FUNCTION__, abi);
 }
-
 
 static struct machine_function *
 m68k_init_machine_status (void)
 {
-  printf ("Debug: %s\n", __PRETTY_FUNCTION__);
+  DPRINTFA("Debug: %s\n", __PRETTY_FUNCTION__);
   struct machine_function *f;
 
   f = ggc_alloc_cleared_machine_function ();

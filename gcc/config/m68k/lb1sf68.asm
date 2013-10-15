@@ -583,7 +583,7 @@ L3:	rts
 	FUNC(__umodsi3)
 	.globl	SYM (__umodsi3)
 SYM (__umodsi3):
-	DEBUG	5
+|	DEBUG	5
 	movel	d0, sp@-
 	movel	d1, a1		/* a1 MUST NOT be clobbered by calls*/
 	PICCALL	SYM (__udivsi3)
