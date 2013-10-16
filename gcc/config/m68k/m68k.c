@@ -1137,7 +1137,7 @@ m68k_init_cumulative_args (CUMULATIVE_ARGS *cum,  /* Argument info to initialize
     cum->regs_already_used |= (1 << M68K_STRUCT_VALUE_REGNUM);
 #endif
   
-  DPRINTFB("Debug: %s = %d, %d\n", __FUNCTION__, cum->abi, cum->libcall);
+  DPRINTFA("Debug: %s = %d, %d\n", __FUNCTION__, cum->abi, cum->libcall);
 }
 
 /* Define where to put the arguments to a function.
@@ -1155,7 +1155,7 @@ rtx m68k_function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode,
         		      const_tree type, bool named)
 {
   DPRINTFA("Debug: %s\n", __FUNCTION__);
-  if (cum->abi != STKPARM_ABI && named)
+  if (cum->abi != STKPARM_ABI)
     {
       int num_of_dregs = (cum->abi == FASTCALL_ABI) ? M68K_FASTCALL_DATA_PARM : cum->abi;
       int num_of_aregs = (cum->abi == FASTCALL_ABI) ? M68K_FASTCALL_ADDR_PARM : cum->abi;
@@ -1163,7 +1163,14 @@ rtx m68k_function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode,
       long mask;
       
       /* FIXME: The last condition below is a workaround for a bug.  */
-      if (TARGET_68881 && FLOAT_MODE_P (mode) &&
+      if (!TARGET_68881 && FLOAT_MODE_P (mode) && GET_MODE_UNIT_SIZE (mode) <= 4 &&
+	  (GET_MODE_CLASS (mode) != MODE_COMPLEX_FLOAT || mode == SCmode))
+        {
+            regbegin = 0; /* Dx */
+    	    regend = regbegin + num_of_dregs;
+            len = (GET_MODE_SIZE (mode) + (UNITS_PER_WORD - 1)) / UNITS_PER_WORD;
+        }
+      else if (TARGET_68881 && FLOAT_MODE_P (mode) &&
           GET_MODE_UNIT_SIZE (mode) <= 12 &&
           (GET_MODE_CLASS (mode) != MODE_COMPLEX_FLOAT || mode == SCmode))
         {
@@ -1216,7 +1223,7 @@ rtx m68k_function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode,
 
 bool m68k_function_regno_clobbered (CUMULATIVE_ARGS *cum, tree fntype, int regno)
 {
-   DPRINTFB("Debug: %s = %d, %d\n", __FUNCTION__, cum->abi, regno);
+   DPRINTFA("Debug: %s = %d, %d\n", __FUNCTION__, cum->abi, regno);
    int num_of_dregs = (cum->abi == FASTCALL_ABI) ? M68K_FASTCALL_DATA_PARM : cum->abi;
    int num_of_aregs = (cum->abi == FASTCALL_ABI) ? M68K_FASTCALL_ADDR_PARM : cum->abi;
    if ((regno / 8) != 1)
@@ -7200,7 +7207,7 @@ m68k_conditional_register_usage (void)
           fixed_regs[i] = call_used_regs[i] = 1;
     }
     m68k_set_abi = abi;
-  DPRINTFB("Debug: %s = %d\n", __FUNCTION__, abi);
+  DPRINTFA("Debug: %s = %d\n", __FUNCTION__, abi);
 }
 
 static struct machine_function *

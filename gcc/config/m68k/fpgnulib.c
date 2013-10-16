@@ -49,8 +49,8 @@
 ** in with -msoft-float.
 */
 
-//#define FASTCALL __attribute__((fastcall))
-#define FASTCALL
+#define FASTCALL __attribute__((fastcall))
+//#define FASTCALL
 
 /* the following deal with IEEE single-precision numbers */
 #define EXCESS		126L
@@ -416,7 +416,9 @@ __unordxf2(long double a, long double b)
 }
 
 /* convert double to long double */
-FASTCALL long double
+// Fake not FASTCALL for long double return
+//FASTCALL
+long double
 __extenddfxf2 (double d)
 {
   register union double_long dl;
@@ -481,7 +483,9 @@ __truncxfdf2 (long double ld)
 }
 
 /* convert a float to a long double */
-FASTCALL long double
+// Fake not FASTCALL for long double return
+//FASTCALL
+long double
 __extendsfxf2 (float f)
 {
   long double foo = __extenddfxf2 (__extendsfdf2 (f));
@@ -497,7 +501,9 @@ __truncxfsf2 (long double ld)
 }
 
 /* convert an int to a long double */
-FASTCALL long double
+// Fake not FASTCALL for long double return
+//FASTCALL
+long double
 __floatsixf (long l)
 {
   double foo = __floatsidf (l);
@@ -505,7 +511,9 @@ __floatsixf (long l)
 }
 
 /* convert an unsigned int to a long double */
-FASTCALL long double
+// Fake not FASTCALL for long double return
+//FASTCALL
+long double
 __floatunsixf (unsigned long l)
 {
   double foo = __floatunsidf (l);
@@ -521,32 +529,37 @@ __fixxfsi (long double ld)
 }
 
 /* The remaining provide crude math support by working in double precision.  */
-
-FASTCALL long double
+// Fake not FASTCALL for long double return
+//FASTCALL
+long double
 __addxf3 (long double x1, long double x2)
 {
   return (double) x1 + (double) x2;
 }
-
-FASTCALL long double
+// Fake not FASTCALL for long double return
+//FASTCALL
+long double
 __subxf3 (long double x1, long double x2)
 {
   return (double) x1 - (double) x2;
 }
-
-FASTCALL long double
+// Fake not FASTCALL for long double return
+//FASTCALL
+long double
 __mulxf3 (long double x1, long double x2)
 {
   return (double) x1 * (double) x2;
 }
-
-FASTCALL long double
+// Fake not FASTCALL for long double return
+//FASTCALL
+long double
 __divxf3 (long double x1, long double x2)
 {
   return (double) x1 / (double) x2;
 }
-
-FASTCALL long double
+// Fake not FASTCALL for long double return
+//FASTCALL
+long double
 __negxf2 (long double x1)
 {
   return - (double) x1;
