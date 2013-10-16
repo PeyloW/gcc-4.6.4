@@ -1213,6 +1213,18 @@ rtx m68k_function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode,
     }
   return NULL_RTX;
 }
+
+bool m68k_function_regno_clobbered (CUMULATIVE_ARGS *cum, tree fntype, int regno)
+{
+   DPRINTFB("Debug: %s = %d, %d\n", __FUNCTION__, cum->abi, regno);
+   int num_of_dregs = (cum->abi == FASTCALL_ABI) ? M68K_FASTCALL_DATA_PARM : cum->abi;
+   int num_of_aregs = (cum->abi == FASTCALL_ABI) ? M68K_FASTCALL_ADDR_PARM : cum->abi;
+   if ((regno / 8) != 1)
+     return (regno & 0x07) < num_of_dregs;
+   else
+     return (regno & 0x07) < num_of_aregs;
+}
+
 
 
 static void
@@ -1366,7 +1378,7 @@ m68k_save_reg (unsigned int regno, bool interrupt_handler)
   if (!df_regs_ever_live_p (regno))
     return false;
 
-  /* Otherwise save everything that isn't call-clobbered.  */
+  /* Otherwise save everything that isn't call-used.  */
   return !call_used_regs[regno];
 }
 

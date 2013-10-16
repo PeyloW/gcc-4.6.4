@@ -2333,6 +2333,19 @@ use_group_regs (rtx *call_fusage, rtx regs)
     }
 }
 
+/* Add a CLOBBER expression for REG to the (possibly empty) list pointed
+   to by CALL_FUSAGE.  REG must denote a hard register.  */
+
+void
+clobber_reg (rtx *call_fusage, rtx reg)
+{
+  gcc_assert (REG_P (reg) && REGNO (reg) < FIRST_PSEUDO_REGISTER);
+
+  *call_fusage
+    = gen_rtx_EXPR_LIST (VOIDmode,
+			 gen_rtx_CLOBBER (VOIDmode, reg), *call_fusage);
+}
+
 /* Return the defining gimple statement for SSA_NAME NAME if it is an
    assigment and the code of the expresion on the RHS is CODE.  Return
    NULL otherwise.  */

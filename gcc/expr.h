@@ -336,6 +336,9 @@ extern void use_regs (rtx *, int, int);
 /* Mark a PARALLEL as holding a parameter for the next CALL_INSN.  */
 extern void use_group_regs (rtx *, rtx);
 
+/* Mark REG as being clobbered for the next CALL_INSN.  */
+extern void clobber_reg (rtx *, rtx);
+
 /* Write zeros through the storage of OBJECT.
    If OBJECT has BLKmode, SIZE is its length in bytes.  */
 extern rtx clear_storage (rtx, rtx, enum block_op_methods);

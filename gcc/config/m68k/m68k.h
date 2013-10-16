@@ -608,6 +608,8 @@ struct m68k_args
 #define FUNCTION_ARG(CUM, MODE, TYPE, NAMED) \
   (m68k_function_arg (&(CUM), (MODE), (TYPE), (NAMED)))
 
+#define FUNCTION_REGNO_CLOBBERED(CUM, FNTYPE, FNDECL, REGNO) \
+  (m68k_function_regno_clobbered (CUM, FNTYPE, REGNO))
 
 #define FUNCTION_PROFILER(FILE, LABELNO)  \
   asm_fprintf (FILE, "\tlea %LLP%d,%Ra0\n\tjsr mcount\n", (LABELNO))
