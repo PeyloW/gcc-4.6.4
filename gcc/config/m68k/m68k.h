@@ -534,23 +534,19 @@ extern enum reg_class regno_reg_class[];
 /* On the m68k, all arguments are usually pushed on the stack.  */
 /* 1 if N is a possible register number for function argument passing.  */
 #define FUNCTION_ARG_REGNO_P(N)			\
-  ((((int)N) >= 0 && (N) < M68K_MAX_REGPARM)		\
-   || ((N) >= 8 && (N) < 8 + M68K_MAX_REGPARM)	\
-   || (TARGET_68881 && (N) >= 16 && (N) < 16 + M68K_MAX_REGPARM))
+  ((((int)N) >= 0 && (N) < M68K_FASTCALL_DATA_PARM)		\
+   || ((N) >= 8 && (N) < 8 + M68K_FASTCALL_ADDR_PARM)	\
+   || (TARGET_68881 && (N) >= 16 && (N) < 16 + M68K_FASTCALL_DATA_PARM))
 
    
 /* Available call abi.  
-   FASTCALL pass arguments in d0-d2, a0-a1 and fp0-fp2 when possible.
    STKPARM pass all arguments on stack.
-   REGPARM pass n arguments in d0-dn-1, a0-an-1 and fp0-fp-1.
-   Default is 2 registers per class for REGPARM, but any positive number
-   is REGPARM (in actuallity M68K_MAX_REGPARM sets the upper limit),
-*/
+   FASTCALL pass arguments in d0-d2, a0-a1 and fp0-fp2 when possible.
+ */
 enum m68k_call_abi
 {
-  FASTCALL_ABI = -1,
   STKPARM_ABI = 0,
-  REGPARM_ABI = 2
+  FASTCALL_ABI = 1
 };
 
 /* The default abi used by target.  */
@@ -560,10 +556,9 @@ enum m68k_call_abi
    fast calls. */
 #define M68K_FASTCALL_DATA_PARM 3
 #define M68K_FASTCALL_ADDR_PARM 2
-/* Max. number of data, address and float registers to be used for passing
-   integer, pointer and float arguments for REGPARM abi. */
-#define M68K_MAX_REGPARM 4
-	  
+
+#define M68K_MIN_CALL_USED_REGS 2
+
 /* On the m68k, this is a structure:
    abi: A defined ABI or a positive integer for nuber of regs to use.
    regs_already_used: bitmask of the already used registers.
@@ -598,12 +593,10 @@ struct m68k_args
 #define FUNCTION_ARG_ADVANCE(CUM, MODE, TYPE, NAMED)	\
   (m68k_function_arg_advance (&(CUM)))
 
-/* On m68k all args are pushed, except if -mregparm is specified, then
-   a number of arguments is passed in the first 'm68k_regparm' data,
-   address and float registers. Or with -mfastcall then d0-2, a0-1 and
+/* On m68k all args are pushed, except if -mfastcall then d0-2, a0-1 and
    fp0-2 are used for passing the first arguments.
    Note: by default, the static-chain is passed in a0. Targets that want
-   to make full use of '-mregparm' are advised to pass the static-chain
+   to make full use of '-mfastcall' are advised to pass the static-chain
    somewhere else.  */
 #define FUNCTION_ARG(CUM, MODE, TYPE, NAMED) \
   (m68k_function_arg (&(CUM), (MODE), (TYPE), (NAMED)))
@@ -1077,8 +1070,6 @@ enum m68k_function_kind
 
 /* Variables in m68k.c; see there for details.  */
 extern const char *m68k_library_id_string;
-//extern const char *m68k_regparm_string;
-extern int m68k_regparm;
 extern enum target_device m68k_cpu;
 extern enum uarch_type m68k_tune;
 extern enum fpu_type m68k_fpu;

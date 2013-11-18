@@ -175,10 +175,7 @@ static rtx m68k_delegitimize_address (rtx);
 const char *m68k_library_id_string = "_current_shared_library_a5_offset_";
 
 /* Specify number of registers for integer, pointer and float arguments.  */
-enum m68k_call_abi m68k_abi;
-
-/* Number fo registers for current ABI, or -1 for fastcall. */
-enum m68k_call_abi m68k_set_abi = STKPARM_ABI;
+enum m68k_call_abi m68k_abi = M68K_DEFAULT_ABI;
 
 
 /* Initialize the GCC target structure.  */
@@ -693,22 +690,8 @@ m68k_option_override (void)
   if (TARGET_SEP_DATA || TARGET_ID_SHARED_LIBRARY)
     flag_pic = 2;
 
-  /* Validate -mregparm, -mregparm=, and -mfastcall value.  */
-  if (m68k_regparm_string)
-    {
-      m68k_abi = atoi (m68k_regparm_string);
-      if (m68k_abi < 1 || m68k_abi > M68K_MAX_REGPARM)
-        error ("-mregparm=%d is not between 1 and %d",
-          m68k_abi, M68K_MAX_REGPARM);
-      target_flags |= MASK_REGPARM;
-    }
-  else
-    if (TARGET_REGPARM)
-      m68k_abi = REGPARM_ABI;
-    else if (TARGET_FASTCALL)
-	  m68k_abi = FASTCALL_ABI;
-	else
-	  m68k_abi = STKPARM_ABI;
+  if (TARGET_FASTCALL)
+    m68k_abi = FASTCALL_ABI;
 
   /* -mpcrel -fPIC uses 32-bit pc-relative displacements.  Raise an
      error if the target does not support them.  */
@@ -936,33 +919,12 @@ m68k_handle_type_attribute (tree *node, tree name, tree args,
   DPRINTFA("Debug: %s\n", __FUNCTION__);
   if (TREE_CODE (*node) == FUNCTION_TYPE || TREE_CODE (*node) == METHOD_TYPE)
     {
-      /* 'regparm' accepts one optional argument - number of registers in
-         single class that should be used to pass arguments.  */
-      if (is_attribute_p ("regparm", name))
+      if (is_attribute_p ("stkparm", name))
         {
-	  m68k_validate_mutually_exclusive_attribute ("regparm", "stkparm", node, name);
-	  m68k_validate_mutually_exclusive_attribute ("regparm", "fastcall", node, name);
-          if (args && TREE_CODE (args) == TREE_LIST)
-            {
-              tree numofregs = TREE_VALUE (args);
-              if (numofregs)
-  	        if (TREE_CODE (numofregs) != INTEGER_CST
-        	    || TREE_INT_CST_HIGH (numofregs)
-        	    || TREE_INT_CST_LOW (numofregs) < 1
-        	    || TREE_INT_CST_LOW (numofregs) > M68K_MAX_REGPARM)
-                  {
-                    error ("invalid argument to `regparm' attribute");
-                  }
-            }
-        }
-      else if (is_attribute_p ("stkparm", name))
-        {
-          m68k_validate_mutually_exclusive_attribute ("stkparm", "regparm", node, name);
           m68k_validate_mutually_exclusive_attribute ("stkparm", "fastcall", node, name);
         }
       else if (is_attribute_p ("stkparm", name))
         {
-          m68k_validate_mutually_exclusive_attribute ("fastcall", "regparm", node, name);
           m68k_validate_mutually_exclusive_attribute ("fastcall", "stkparm", node, name);
         }
     }
@@ -1036,26 +998,12 @@ m68k_function_type_abi (const_tree fntype)
   DPRINTFA("Debug: %s\n", __FUNCTION__);
   if (! fntype)
     return FASTCALL_ABI; 
-  if (lookup_attribute ("stkparm", TYPE_ATTRIBUTES (fntype)))
+  else if (lookup_attribute ("stkparm", TYPE_ATTRIBUTES (fntype)))
     return STKPARM_ABI;
   else if (lookup_attribute ("fastcall", TYPE_ATTRIBUTES (fntype)))
     return FASTCALL_ABI;
   else
-    {
-      tree ratree = lookup_attribute ("regparm", TYPE_ATTRIBUTES (fntype));
-      if (ratree)
-        {
-          if (TREE_VALUE (ratree)
-              && TREE_CODE (TREE_VALUE (ratree)) == TREE_LIST)
-            {
-              tree num_of_regs = TREE_VALUE (TREE_VALUE (ratree));
-              return num_of_regs ? TREE_INT_CST_LOW (num_of_regs) :
-            	      (m68k_abi ? m68k_abi : REGPARM_ABI);
-            }
-        }
-      else
-        return m68k_abi;
-    }
+    return m68k_abi;
 }
 
 static enum m68k_call_abi 
@@ -1095,16 +1043,10 @@ m68k_call_abi_override (const_tree fndecl)
 static enum m68k_call_abi m68k_abi_from_call_used_regs (void)
 {
   DPRINTFA("Debug: %s\n", __FUNCTION__);
-  int i;
-  for (i = 0; i < 8; i++)
-    {
-      if (call_used_regs[i + 8] == 0)
-        if (call_used_regs[i] == 1)
-          return FASTCALL_ABI;
-        else
-          return i;
-    }
-  return STKPARM_ABI; 
+  if (call_used_regs[M68K_FASTCALL_DATA_PARM - 1])
+    return FASTCALL_ABI;
+  else
+    return STKPARM_ABI; 
 }
 
 static void
@@ -1155,10 +1097,8 @@ rtx m68k_function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode,
         		      const_tree type, bool named)
 {
   DPRINTFA("Debug: %s\n", __FUNCTION__);
-  if (cum->abi != STKPARM_ABI)
+  if (cum->abi == FASTCALL_ABI)
     {
-      int num_of_dregs = (cum->abi == FASTCALL_ABI) ? M68K_FASTCALL_DATA_PARM : cum->abi;
-      int num_of_aregs = (cum->abi == FASTCALL_ABI) ? M68K_FASTCALL_ADDR_PARM : cum->abi;
       int regbegin = -1, regend, len;
       long mask;
       
@@ -1167,7 +1107,7 @@ rtx m68k_function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode,
 	  (GET_MODE_CLASS (mode) != MODE_COMPLEX_FLOAT || mode == SCmode))
         {
             regbegin = 0; /* Dx */
-    	    regend = regbegin + num_of_dregs;
+    	    regend = regbegin + M68K_FASTCALL_DATA_PARM;
             len = (GET_MODE_SIZE (mode) + (UNITS_PER_WORD - 1)) / UNITS_PER_WORD;
         }
       else if (TARGET_68881 && FLOAT_MODE_P (mode) &&
@@ -1175,7 +1115,7 @@ rtx m68k_function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode,
           (GET_MODE_CLASS (mode) != MODE_COMPLEX_FLOAT || mode == SCmode))
         {
           regbegin = 16; /* FPx */
-	  regend = regbegin + num_of_dregs;
+	  regend = regbegin + M68K_FASTCALL_DATA_PARM;
           len = GET_MODE_NUNITS (mode);
         }
       /* FIXME: Two last conditions below are workarounds for bugs.  */
@@ -1184,12 +1124,12 @@ rtx m68k_function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode,
           if (type && POINTER_TYPE_P (type))  // THIS
           {
             regbegin = 8; /* Ax */
-	    regend = regbegin + num_of_aregs;
+	    regend = regbegin + M68K_FASTCALL_ADDR_PARM;
           }
           else
           {
             regbegin = 0; /* Dx */
-	    regend = regbegin + num_of_dregs;
+	    regend = regbegin + M68K_FASTCALL_DATA_PARM;
           }
           len = (GET_MODE_SIZE (mode) + (UNITS_PER_WORD - 1)) / UNITS_PER_WORD;
         }
@@ -1224,12 +1164,15 @@ rtx m68k_function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode,
 bool m68k_function_regno_clobbered (CUMULATIVE_ARGS *cum, tree fntype, int regno)
 {
    DPRINTFA("Debug: %s = %d, %d\n", __FUNCTION__, cum->abi, regno);
-   int num_of_dregs = (cum->abi == FASTCALL_ABI) ? M68K_FASTCALL_DATA_PARM : cum->abi;
-   int num_of_aregs = (cum->abi == FASTCALL_ABI) ? M68K_FASTCALL_ADDR_PARM : cum->abi;
-   if ((regno / 8) != 1)
-     return (regno & 0x07) < num_of_dregs;
-   else
-     return (regno & 0x07) < num_of_aregs;
+   int subregno = (regno & 0x07);
+   if (subregno >= M68K_MIN_CALL_USED_REGS && cum->abi == FASTCALL_ABI)
+     {
+       if ((regno / 8) != 1)
+         return subregno < M68K_FASTCALL_DATA_PARM;
+       else
+         return subregno < M68K_FASTCALL_ADDR_PARM;
+     }
+   return false;
 }
 
 
@@ -7183,9 +7126,9 @@ m68k_conditional_register_usage (void)
 {
   int i;
   enum m68k_call_abi abi = m68k_cfun_abi ();
-  int num_of_dregs = ((abi == FASTCALL_ABI) ? M68K_FASTCALL_DATA_PARM : MAX(2, abi));
-  int num_of_aregs = ((abi == FASTCALL_ABI) ? M68K_FASTCALL_ADDR_PARM : MAX(2, abi));
-  for (i = 0; i < 8; i++)
+  int num_of_dregs = (abi == FASTCALL_ABI) ? M68K_FASTCALL_DATA_PARM : 2;
+  int num_of_aregs = (abi == FASTCALL_ABI) ? M68K_FASTCALL_ADDR_PARM : 2;
+  for (i = M68K_MIN_CALL_USED_REGS; i < 8; i++)
     {
       call_used_regs[i] = (i < num_of_dregs) | fixed_regs[i];
       call_used_regs[i + 8] = (i < num_of_aregs) | fixed_regs[i + 8];
@@ -7206,7 +7149,6 @@ m68k_conditional_register_usage (void)
         if (TEST_HARD_REG_BIT (x, i))
           fixed_regs[i] = call_used_regs[i] = 1;
     }
-    m68k_set_abi = abi;
   DPRINTFA("Debug: %s = %d\n", __FUNCTION__, abi);
 }
 
