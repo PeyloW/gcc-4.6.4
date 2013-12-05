@@ -270,7 +270,7 @@ while (0)
 
 #undef FUNCTION_VALUE
 #define FUNCTION_VALUE(VALTYPE, FUNC)					\
-  m68k_function_value (VALTYPE, FUNC)
+  m68k_function_value (VALTYPE, FUNC, true)
 
 
 /* Define how to find the value returned by a library function
@@ -280,7 +280,7 @@ while (0)
 
 #undef LIBCALL_VALUE
 #define LIBCALL_VALUE(MODE)						\
-  m68k_libcall_value (MODE)
+  m68k_libcall_value (MODE, true)
 
 
 /* Boundary (in *bits*) on which stack pointer should be aligned.

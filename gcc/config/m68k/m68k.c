@@ -997,7 +997,7 @@ m68k_function_type_abi (const_tree fntype)
 {
   DPRINTFA("Debug: %s\n", __FUNCTION__);
   if (! fntype)
-    return FASTCALL_ABI; 
+    return STKPARM_ABI; //FASTCALL_ABI; 
   else if (lookup_attribute ("stkparm", TYPE_ATTRIBUTES (fntype)))
     return STKPARM_ABI;
   else if (lookup_attribute ("fastcall", TYPE_ATTRIBUTES (fntype)))
@@ -5757,7 +5757,7 @@ m68k_preferred_reload_class (rtx x, enum reg_class rclass)
    If there is need for a hard-float ABI it is probably worth doing it
    properly and also passing function arguments in FP registers.  */
 rtx
-m68k_libcall_value (enum machine_mode mode)
+m68k_libcall_value (enum machine_mode mode, bool regs)
 {
   DPRINTFA("Debug: %s\n", __FUNCTION__);
   switch (mode) {
@@ -5778,12 +5778,14 @@ m68k_libcall_value (enum machine_mode mode)
    NOTE: Due to differences in ABIs, don't call this function directly,
    use FUNCTION_VALUE instead.  */
 rtx
-m68k_function_value (const_tree valtype, const_tree func ATTRIBUTE_UNUSED)
+m68k_function_value (const_tree valtype, const_tree func ATTRIBUTE_UNUSED, bool regs)
 {
   DPRINTFA("Debug: %s\n", __FUNCTION__);
-  enum machine_mode mode;
+  enum machine_mode mode = TYPE_MODE (valtype);
+  if (! regs)
+    if (m68k_function_abi(func) != FASTCALL_ABI)
+      return gen_rtx_REG (mode, D0_REG);
 
-  mode = TYPE_MODE (valtype);
   switch (mode) {
   case SFmode:
   case DFmode:
@@ -5796,7 +5798,7 @@ m68k_function_value (const_tree valtype, const_tree func ATTRIBUTE_UNUSED)
   }
 
   /* If the function returns a pointer, push that into %a0.  */
-  if (func && POINTER_TYPE_P (TREE_TYPE (TREE_TYPE (func))))
+  if (regs && func && POINTER_TYPE_P (TREE_TYPE (TREE_TYPE (func))))
     /* For compatibility with the large body of existing code which
        does not always properly declare external functions returning
        pointer types, the m68k/SVR4 convention is to copy the value

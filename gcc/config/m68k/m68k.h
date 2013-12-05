@@ -517,11 +517,13 @@ extern enum reg_class regno_reg_class[];
 #define FIRST_PARM_OFFSET(FNDECL) 8
 
 /* On the m68k the return value defaults to D0.  */
-#define FUNCTION_VALUE(VALTYPE, FUNC)  \
-  gen_rtx_REG (TYPE_MODE (VALTYPE), D0_REG)
+#undef FUNCTION_VALUE
+#define FUNCTION_VALUE(VALTYPE, FUNC)					\
+  m68k_function_value (VALTYPE, FUNC, false)
 
 /* On the m68k the return value defaults to D0.  */
-#define LIBCALL_VALUE(MODE)  gen_rtx_REG (MODE, D0_REG)
+#define LIBCALL_VALUE(MODE)						\
+  m68k_libcall_value (MODE, false)
 
 /* On the m68k, D0 is usually the only register used.  */
 #define FUNCTION_VALUE_REGNO_P(N) ((N) == D0_REG)

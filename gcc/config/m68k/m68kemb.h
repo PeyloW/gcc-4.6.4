@@ -23,7 +23,7 @@
 
 #undef LIBCALL_VALUE
 #define LIBCALL_VALUE(MODE)					\
-  m68k_libcall_value (MODE)
+  m68k_libcall_value (MODE, true)
 
 #undef FUNCTION_VALUE_REGNO_P
 #define FUNCTION_VALUE_REGNO_P(N)			\
