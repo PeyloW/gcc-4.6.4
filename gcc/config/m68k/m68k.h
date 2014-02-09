@@ -307,7 +307,7 @@ along with GCC; see the file COPYING3.  If not see
 
 #define UNITS_PER_WORD 4
 
-#define PARM_BOUNDARY (TARGET_SHORT ? 16 : 32)
+#define PARM_BOUNDARY ((TARGET_SHORT ||  (TARGET_FASTCALL && TUNE_68000_10)) ? 16 : 32)
 #define STACK_BOUNDARY 16
 #define FUNCTION_BOUNDARY 16
 #define EMPTY_FIELD_BOUNDARY 16
@@ -443,8 +443,8 @@ along with GCC; see the file COPYING3.  If not see
  */
 #define ARG_POINTER_REGNUM 24
 
-#define STATIC_CHAIN_REGNUM A0_REG
-#define M68K_STATIC_CHAIN_REG_NAME REGISTER_PREFIX "a0"
+#define STATIC_CHAIN_REGNUM (TARGET_FASTCALL ? A2_REG : A0_REG)
+#define M68K_STATIC_CHAIN_REG_NAME (TARGET_FASTCALL ? REGISTER_PREFIX "a2" : REGISTER_PREFIX "a0")
 
 /* Register in which address to store a structure value
    is passed to a function.  */
@@ -541,47 +541,29 @@ extern enum reg_class regno_reg_class[];
    || (TARGET_68881 && (N) >= 16 && (N) < 16 + M68K_FASTCALL_DATA_PARM))
 
    
-/* Available call abi.  
-   STKPARM pass all arguments on stack.
-   FASTCALL pass arguments in d0-d2, a0-a1 and fp0-fp2 when possible.
- */
-enum m68k_call_abi
-{
-  STKPARM_ABI = 0,
-  FASTCALL_ABI = 1
-};
-
-/* The default abi used by target.  */
-#define M68K_DEFAULT_ABI STKPARM_ABI
-
 /* The number of data/float registers and address registers to use for
    fast calls. */
 #define M68K_FASTCALL_DATA_PARM 3
 #define M68K_FASTCALL_ADDR_PARM 2
 
 // Call clobbered regs.
+#define M68K_STD_USED_REGS 2
 #define M68K_FASTCALL_USED_DATA_REGS 3
-#define M68K_FASTCALL_USED_ADDR_REGS 2
-
-#define M68K_MIN_CALL_USED_REGS 2
+#define M68K_FASTCALL_USED_ADDR_REGS 3
 
 /* On the m68k, this is a structure:
-   abi: A defined ABI or a positive integer for nuber of regs to use.
    regs_already_used: bitmask of the already used registers.
    last_arg_reg - register number of the most recently passed argument.
      -1 if passed on stack.
    last_arg_len - number of registers used by the most recently passed
      argument.
-   libcall - is library call (fastcall).
 */
 
 struct m68k_args
 {
-  enum m68k_call_abi abi;
   long regs_already_used;
   int last_arg_reg;
   int last_arg_len;
-  int libcall;
 };
 
 #define CUMULATIVE_ARGS struct m68k_args
@@ -590,8 +572,6 @@ struct m68k_args
    user specified '-mregparm' switch, not '-mregparm=<value>' option.  */
 
 #define ADJUST_REG_ALLOC_ORDER m68k_order_regs_for_local_alloc ()
-
-#define OVERRIDE_ABI_FORMAT(FNDECL) m68k_call_abi_override (FNDECL)
 
 #define INIT_CUMULATIVE_ARGS(CUM, FNTYPE, LIBNAME, FNDECL, N_NAMED_ARGS) \
   (m68k_init_cumulative_args (&(CUM), (FNTYPE)))
@@ -606,9 +586,6 @@ struct m68k_args
    somewhere else.  */
 #define FUNCTION_ARG(CUM, MODE, TYPE, NAMED) \
   (m68k_function_arg (&(CUM), (MODE), (TYPE), (NAMED)))
-
-#define FUNCTION_REGNO_CLOBBERED(CUM, FNTYPE, FNDECL, REGNO) \
-  (m68k_function_regno_clobbered (CUM, FNTYPE, REGNO))
 
 #define FUNCTION_PROFILER(FILE, LABELNO)  \
   asm_fprintf (FILE, "\tlea %LLP%d,%Ra0\n\tjsr mcount\n", (LABELNO))
@@ -655,8 +632,8 @@ struct m68k_args
    The function name __transfer_from_trampoline is not actually used.
    The function definition just permits use of "asm with operands"
    (though the operand list is empty).  */
+	  /*
 #define TRANSFER_FROM_TRAMPOLINE				\
-__attribute__((fastcall))					\
 void								\
 __transfer_from_trampoline ()					\
 {								\
@@ -667,6 +644,7 @@ __transfer_from_trampoline ()					\
   asm volatile ("move%.l %1,%0" : "=a" (a0) : "m" (a0[18]));	\
   asm ("rts":);							\
 }
+*/
 
 /* There are two registers that can always be eliminated on the m68k.
    The frame pointer and the arg pointer can be replaced by either the
@@ -1104,7 +1082,3 @@ extern int m68k_sched_address_bypass_p (rtx, rtx);
 extern int m68k_sched_indexed_address_bypass_p (rtx, rtx);
 
 #define CPU_UNITS_QUERY 1
-
-struct GTY(()) machine_function {
-  enum m68k_call_abi abi;
-};

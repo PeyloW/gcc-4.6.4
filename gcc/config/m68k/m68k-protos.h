@@ -109,6 +109,5 @@ extern void m68k_init_cumulative_args (CUMULATIVE_ARGS *, tree);
 extern void m68k_function_arg_advance (CUMULATIVE_ARGS *);
 extern rtx m68k_function_arg (CUMULATIVE_ARGS *, enum machine_mode,
 			      const_tree, bool);
-extern bool m68k_function_regno_clobbered (CUMULATIVE_ARGS *, tree, int);
 #endif
 #endif

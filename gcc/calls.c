@@ -203,21 +203,6 @@ prepare_call_address (tree fndecl, rtx funexp, rtx static_chain_value,
   return funexp;
 }
 
-#if defined (FUNCTION_REGNO_CLOBBERED)
-static void
-add_function_clobber (rtx *call_fusage, 
-                      CUMULATIVE_ARGS *args_so_far,
-                      tree fntype,
-                      tree fndecl)
-{
-  int regno;
-  for (regno = 0; regno < FIRST_PSEUDO_REGISTER; regno++)
-    if (! call_used_regs [regno])
-      if (FUNCTION_REGNO_CLOBBERED (args_so_far, fndecl, fntype, regno))
-	      clobber_reg (call_fusage, regno_reg_rtx[regno]);
-}
-#endif
-
 /* Generate instructions to call function FUNEXP,
    and optionally pop the results.
    The CALL_INSN is the first insn generated.
@@ -380,11 +365,6 @@ emit_call_1 (rtx funexp, tree fntree ATTRIBUTE_UNUSED, tree fndecl ATTRIBUTE_UNU
 
   /* Find the call we just emitted.  */
   call_insn = last_call_insn ();
-
-#if defined (FUNCTION_REGNO_CLOBBERED)
-  /* Add the register clobberage information if needed there.  */
-  add_function_clobber (&call_fusage, args_so_far, funtype, fndecl);
-#endif
 
   /* Put the register usage information there.  */
   add_function_usage_to (call_insn, call_fusage);

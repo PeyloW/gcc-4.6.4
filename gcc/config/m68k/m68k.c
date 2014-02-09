@@ -127,11 +127,8 @@ struct m68k_address {
 };
 
 static bool m68k_can_eliminate (const int, const int);
-static void m68k_maybe_switch_abi (void);
 static void m68k_set_current_function (tree);
-static enum m68k_call_abi m68k_function_abi (const_tree);
 static void m68k_conditional_register_usage (void);
-static struct machine_function * m68k_init_machine_status (void);
 static bool m68k_legitimate_address_p (enum machine_mode, rtx, bool);
 static bool m68k_handle_option (size_t, const char *, int);
 static void m68k_option_override (void);
@@ -163,9 +160,6 @@ static rtx m68k_delegitimize_address (rtx);
 
 /* Specify the identification number of the library being built */
 const char *m68k_library_id_string = "_current_shared_library_a5_offset_";
-
-/* Specify number of registers for integer, pointer and float arguments.  */
-enum m68k_call_abi m68k_abi = M68K_DEFAULT_ABI;
 
 
 /* Initialize the GCC target structure.  */
@@ -254,9 +248,6 @@ enum m68k_call_abi m68k_abi = M68K_DEFAULT_ABI;
 
 #undef TARGET_CAN_ELIMINATE
 #define TARGET_CAN_ELIMINATE m68k_can_eliminate
-
-#undef TARGET_EXPAND_TO_RTL_HOOK
-#define TARGET_EXPAND_TO_RTL_HOOK m68k_maybe_switch_abi
 
 #undef TARGET_SET_CURRENT_FUNCTION
 #define TARGET_SET_CURRENT_FUNCTION m68k_set_current_function
@@ -563,8 +554,6 @@ m68k_option_override (void)
   const struct m68k_target_selection *entry;
   unsigned long target_mask;
 
-  init_machine_status = m68k_init_machine_status;
-
   /* User can choose:
 
      -mcpu=
@@ -651,9 +640,6 @@ m68k_option_override (void)
    */
   if (TARGET_SEP_DATA || TARGET_ID_SHARED_LIBRARY)
     flag_pic = 2;
-
-  if (TARGET_FASTCALL)
-    m68k_abi = FASTCALL_ABI;
 
   /* -mpcrel -fPIC uses 32-bit pc-relative displacements.  Raise an
      error if the target does not support them.  */
@@ -933,73 +919,6 @@ m68k_comp_type_attributes (tree type1, tree type2)
 }
 
 
-/* Returns ABI dependent on fntype, specifying the call abi used.  */
-static enum m68k_call_abi
-m68k_function_type_abi (const_tree fntype)
-{
-  DPRINTFA("Debug: %s\n", __FUNCTION__);
-  if (! fntype)
-    return STKPARM_ABI; //FASTCALL_ABI; 
-  else if (lookup_attribute ("stkparm", TYPE_ATTRIBUTES (fntype)))
-    return STKPARM_ABI;
-  else if (lookup_attribute ("fastcall", TYPE_ATTRIBUTES (fntype)))
-    return FASTCALL_ABI;
-  else
-    return m68k_abi;
-}
-
-static enum m68k_call_abi 
-m68k_function_abi (const_tree fndecl)
-{
-  DPRINTFA("Debug: %s\n", __FUNCTION__);
-  if (! fndecl)
-     return FASTCALL_ABI;
-  return m68k_function_type_abi (TREE_TYPE (fndecl));
-}
-
-/* Argument-passing support functions.  */
-
-static enum m68k_call_abi
-m68k_cfun_abi (void) 
-{
-  enum m68k_call_abi abi = m68k_abi;
-  if (cfun)
-    abi = cfun->machine->abi;
-  DPRINTFA("Debug: %s = %d\n", __FUNCTION__, abi);
-  return abi;
-}
-
-
-void
-m68k_call_abi_override (const_tree fndecl)
-{
-  if (fndecl == NULL_TREE)
-    cfun->machine->abi = m68k_abi;
-  else
-    cfun->machine->abi = m68k_function_type_abi (TREE_TYPE (fndecl));
-  DPRINTFA("Debug: %s = %d\n", __FUNCTION__, cfun->machine->abi);
-}
-
-/*  We may need to re-do used regs and reg alloc order tables if ABI changes. */
-
-static enum m68k_call_abi m68k_abi_from_call_used_regs (void)
-{
-  DPRINTFA("Debug: %s\n", __FUNCTION__);
-  if (call_used_regs[M68K_FASTCALL_DATA_PARM - 1])
-    return FASTCALL_ABI;
-  else
-    return STKPARM_ABI; 
-}
-
-static void
-m68k_maybe_switch_abi (void)
-{
-  int ri = m68k_abi_from_call_used_regs () != cfun->machine->abi;
-  DPRINTFA("Debug: %s\n = %s, %d", __FUNCTION__, ri ? "" : "switch ABI", m68k_cfun_abi ());
-  if (ri)
-    reinit_regs ();
-}
-
 /* Initialize a variable CUM of type CUMULATIVE_ARGS
    for a call to a function whose data type is FNTYPE.
    For a library call, FNTYPE is 0.  */
@@ -1008,10 +927,9 @@ void
 m68k_init_cumulative_args (CUMULATIVE_ARGS *cum,  /* Argument info to initialize */
 			      tree fntype)	/* tree ptr for function decl */
 {
+  DPRINTFA("Debug: %s\n", __FUNCTION__);
   cum->last_arg_reg = -1;
   cum->regs_already_used = 0;
-  cum->libcall = (fntype == 0);
-  cum->abi = m68k_function_type_abi (fntype);
 	
 #if ! defined (PCC_STATIC_STRUCT_RETURN) && defined (M68K_STRUCT_VALUE_REGNUM)
   /* If return value is a structure, and we pass the buffer address in a
@@ -1020,8 +938,6 @@ m68k_init_cumulative_args (CUMULATIVE_ARGS *cum,  /* Argument info to initialize
   if (fntype && aggregate_value_p (TREE_TYPE (fntype), fntype))
     cum->regs_already_used |= (1 << M68K_STRUCT_VALUE_REGNUM);
 #endif
-  
-  DPRINTFA("Debug: %s = %d, %d\n", __FUNCTION__, cum->abi, cum->libcall);
 }
 
 /* Define where to put the arguments to a function.
@@ -1039,7 +955,7 @@ rtx m68k_function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode,
         		      const_tree type, bool named)
 {
   DPRINTFA("Debug: %s\n", __FUNCTION__);
-  if (cum->abi == FASTCALL_ABI)
+  if (TARGET_FASTCALL)
     {
       int regbegin = -1, regend, len;
       long mask;
@@ -1101,21 +1017,6 @@ rtx m68k_function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode,
         }
     }
   return NULL_RTX;
-}
-
-bool m68k_function_regno_clobbered (CUMULATIVE_ARGS *cum, tree fntype, int regno)
-{
-   return false;
-   DPRINTFA("Debug: %s = %d, %d\n", __FUNCTION__, cum->abi, regno);
-   int subregno = (regno & 0x07);
-   if (subregno >= M68K_MIN_CALL_USED_REGS && cum->abi == FASTCALL_ABI)
-     {
-       if ((regno / 8) != 1)
-         return subregno < M68K_FASTCALL_USED_DATA_REGS;
-       else
-         return subregno < M68K_FASTCALL_USED_ADDR_REGS;
-     }
-   return false;
 }
 
 
@@ -1760,9 +1661,6 @@ m68k_ok_for_sibcall_p (tree decl, tree exp)
       type = TREE_TYPE (type);			/* pointer type */
       type = TREE_TYPE (type);			/* function type */
     }
-
-  if (cfun->machine->abi != m68k_function_type_abi (type))
-    return false;
 
   if (!VOID_TYPE_P (TREE_TYPE (DECL_RESULT (cfun->decl))))
     {
@@ -5726,7 +5624,7 @@ m68k_function_value (const_tree valtype, const_tree func ATTRIBUTE_UNUSED, bool 
   DPRINTFA("Debug: %s\n", __FUNCTION__);
   enum machine_mode mode = TYPE_MODE (valtype);
   if (! regs)
-    if (m68k_function_abi(func) != FASTCALL_ABI)
+    if (!TARGET_FASTCALL)
       return gen_rtx_REG (mode, D0_REG);
 
   switch (mode) {
@@ -5741,7 +5639,7 @@ m68k_function_value (const_tree valtype, const_tree func ATTRIBUTE_UNUSED, bool 
   }
 
   /* If the function returns a pointer, push that into %a0.  */
-  if (regs && func && POINTER_TYPE_P (TREE_TYPE (TREE_TYPE (func))) && m68k_function_abi(func) != FASTCALL_ABI)
+  if (regs && func && POINTER_TYPE_P (TREE_TYPE (TREE_TYPE (func))) && !TARGET_FASTCALL)
     /* For compatibility with the large body of existing code which
        does not always properly declare external functions returning
        pointer types, the m68k/SVR4 convention is to copy the value
@@ -5906,10 +5804,9 @@ static void
 m68k_conditional_register_usage (void)
 {
   int i;
-  enum m68k_call_abi abi = m68k_cfun_abi ();
-  int num_of_dregs = (abi == FASTCALL_ABI) ? M68K_FASTCALL_USED_DATA_REGS : 2;
-  int num_of_aregs = (abi == FASTCALL_ABI) ? M68K_FASTCALL_USED_ADDR_REGS : 2;
-  for (i = M68K_MIN_CALL_USED_REGS; i < 8; i++)
+  int num_of_dregs = (TARGET_FASTCALL) ? M68K_FASTCALL_USED_DATA_REGS : M68K_STD_USED_REGS;
+  int num_of_aregs = (TARGET_FASTCALL) ? M68K_FASTCALL_USED_ADDR_REGS : M68K_STD_USED_REGS;
+  for (i = 0; i < 8; i++)
     {
       call_used_regs[i] = (i < num_of_dregs) | fixed_regs[i];
       call_used_regs[i + 8] = (i < num_of_aregs) | fixed_regs[i + 8];
@@ -5930,19 +5827,6 @@ m68k_conditional_register_usage (void)
         if (TEST_HARD_REG_BIT (x, i))
           fixed_regs[i] = call_used_regs[i] = 1;
     }
-  DPRINTFA("Debug: %s = %d\n", __FUNCTION__, abi);
-}
-
-static struct machine_function *
-m68k_init_machine_status (void)
-{
-  DPRINTFA("Debug: %s\n", __FUNCTION__);
-  struct machine_function *f;
-
-  f = ggc_alloc_cleared_machine_function ();
-  f->abi = m68k_abi;
-
-  return f;
 }
 
 #include "m68k-sched.inc"
