@@ -1105,14 +1105,15 @@ rtx m68k_function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode,
 
 bool m68k_function_regno_clobbered (CUMULATIVE_ARGS *cum, tree fntype, int regno)
 {
+   return false;
    DPRINTFA("Debug: %s = %d, %d\n", __FUNCTION__, cum->abi, regno);
    int subregno = (regno & 0x07);
    if (subregno >= M68K_MIN_CALL_USED_REGS && cum->abi == FASTCALL_ABI)
      {
        if ((regno / 8) != 1)
-         return subregno < M68K_FASTCALL_DATA_PARM;
+         return subregno < M68K_FASTCALL_USED_DATA_REGS;
        else
-         return subregno < M68K_FASTCALL_ADDR_PARM;
+         return subregno < M68K_FASTCALL_USED_ADDR_REGS;
      }
    return false;
 }
@@ -5740,7 +5741,7 @@ m68k_function_value (const_tree valtype, const_tree func ATTRIBUTE_UNUSED, bool 
   }
 
   /* If the function returns a pointer, push that into %a0.  */
-  if (regs && func && POINTER_TYPE_P (TREE_TYPE (TREE_TYPE (func))))
+  if (regs && func && POINTER_TYPE_P (TREE_TYPE (TREE_TYPE (func))) && m68k_function_abi(func) != FASTCALL_ABI)
     /* For compatibility with the large body of existing code which
        does not always properly declare external functions returning
        pointer types, the m68k/SVR4 convention is to copy the value
@@ -5906,8 +5907,8 @@ m68k_conditional_register_usage (void)
 {
   int i;
   enum m68k_call_abi abi = m68k_cfun_abi ();
-  int num_of_dregs = (abi == FASTCALL_ABI) ? M68K_FASTCALL_DATA_PARM : 2;
-  int num_of_aregs = (abi == FASTCALL_ABI) ? M68K_FASTCALL_ADDR_PARM : 2;
+  int num_of_dregs = (abi == FASTCALL_ABI) ? M68K_FASTCALL_USED_DATA_REGS : 2;
+  int num_of_aregs = (abi == FASTCALL_ABI) ? M68K_FASTCALL_USED_ADDR_REGS : 2;
   for (i = M68K_MIN_CALL_USED_REGS; i < 8; i++)
     {
       call_used_regs[i] = (i < num_of_dregs) | fixed_regs[i];

@@ -559,6 +559,10 @@ enum m68k_call_abi
 #define M68K_FASTCALL_DATA_PARM 3
 #define M68K_FASTCALL_ADDR_PARM 2
 
+// Call clobbered regs.
+#define M68K_FASTCALL_USED_DATA_REGS 3
+#define M68K_FASTCALL_USED_ADDR_REGS 2
+
 #define M68K_MIN_CALL_USED_REGS 2
 
 /* On the m68k, this is a structure:
