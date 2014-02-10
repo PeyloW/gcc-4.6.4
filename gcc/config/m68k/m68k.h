@@ -143,6 +143,16 @@ along with GCC; see the file COPYING3.  If not see
 	  builtin_define ("__M68881__"); /* Non-standard */		\
 	}								\
 									\
+      if (TARGET_SHORT)                                                 \
+        {                                                               \
+      	  builtin_define ("__SHORT__"); /* Non-standard */		\
+        }                                                               \
+                                                                        \
+      if (TARGET_SHORT)                                                 \
+        {                                                               \
+      	  builtin_define ("__FASTCALL__"); /* Non-standard */		\
+        }                                                               \
+                                                                        \
       if (TARGET_COLDFIRE)						\
 	{								\
 	  const char *tmp;						\
