@@ -137,6 +137,7 @@ static rtx find_addr_reg (rtx);
 static const char *singlemove_string (rtx *);
 static void m68k_output_mi_thunk (FILE *, tree, HOST_WIDE_INT,
         				  HOST_WIDE_INT, tree);
+static bool m68k_promote_prototypes (const_tree);
 static rtx m68k_struct_value_rtx (tree, int);
 static tree m68k_handle_fndecl_attribute (tree *node, tree name,
         				  tree args, int flags,
@@ -219,7 +220,7 @@ const char *m68k_library_id_string = "_current_shared_library_a5_offset_";
 #define TARGET_ATTRIBUTE_TABLE m68k_attribute_table
 
 #undef TARGET_PROMOTE_PROTOTYPES
-#define TARGET_PROMOTE_PROTOTYPES hook_bool_const_tree_true
+#define TARGET_PROMOTE_PROTOTYPES m68k_promote_prototypes
 
 #undef TARGET_STRUCT_VALUE_RTX
 #define TARGET_STRUCT_VALUE_RTX m68k_struct_value_rtx
@@ -5467,6 +5468,12 @@ m68k_output_mi_thunk (FILE *file, tree thunk ATTRIBUTE_UNUSED,
   /* Restore the original PIC register.  */
   if (flag_pic)
     SET_REGNO (pic_offset_table_rtx, PIC_REG);
+}
+
+static bool
+m68k_promote_prototypes (const_tree t ATTRIBUTE_UNUSED)
+{
+    return !TARGET_FASTCALL;
 }
 
 /* Worker function for TARGET_STRUCT_VALUE_RTX.  */

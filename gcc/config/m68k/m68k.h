@@ -148,7 +148,7 @@ along with GCC; see the file COPYING3.  If not see
       	  builtin_define ("__SHORT__"); /* Non-standard */		\
         }                                                               \
                                                                         \
-      if (TARGET_SHORT)                                                 \
+      if (TARGET_FASTCALL)                                              \
         {                                                               \
       	  builtin_define ("__FASTCALL__"); /* Non-standard */		\
         }                                                               \
