@@ -338,8 +338,6 @@ along with GCC; see the file COPYING3.  If not see
 
 #define INT_TYPE_SIZE (TARGET_SHORT ? 16 : 32)
 
-#define BUS_SIZE ((TUNE_68000_10 || TARGET_SHORT) ? 16 : 32)
-
 /* Define these to avoid dependence on meaning of `int'.  */
 #define WCHAR_TYPE "long int"
 #define WCHAR_TYPE_SIZE 32
@@ -510,9 +508,6 @@ extern enum reg_class regno_reg_class[];
 /* Moves between fp regs and other regs are two insns.  */
 #define REGISTER_MOVE_COST(MODE, CLASS1, CLASS2)	\
   ((((CLASS1) == FP_REGS) != ((CLASS2) == FP_REGS)) ? 4 : 2)
-
-#define MEMORY_MOVE_COST(M, CLASS, IN)			\
-  (BUS_SIZE <= GET_MODE_SIZE (M) ? 8 : 12)
 
 #define IRA_COVER_CLASSES						\
 {									\
