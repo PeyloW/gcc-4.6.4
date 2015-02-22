@@ -150,6 +150,7 @@ static bool m68k_ok_for_sibcall_p (tree, tree);
 static bool m68k_tls_symbol_p (rtx);
 static rtx m68k_legitimize_address (rtx, rtx, enum machine_mode);
 static bool m68k_rtx_costs (rtx, int, int, int *, bool);
+static int m68k_address_cost (rtx, bool);
 #if M68K_HONOR_TARGET_STRICT_ALIGNMENT
 static bool m68k_return_in_memory (const_tree, const_tree);
 #endif
@@ -215,6 +216,9 @@ const char *m68k_library_id_string = "_current_shared_library_a5_offset_";
 
 #undef TARGET_RTX_COSTS
 #define TARGET_RTX_COSTS m68k_rtx_costs
+
+#undef  TARGET_ADDRESS_COST
+#define TARGET_ADDRESS_COST m68k_address_cost
 
 #undef TARGET_ATTRIBUTE_TABLE
 #define TARGET_ATTRIBUTE_TABLE m68k_attribute_table
@@ -3231,6 +3235,30 @@ m68k_rtx_costs (rtx x, int code, int outer_code, int *total,
 
     default:
       return false;
+    }
+}
+
+/* All address computations that can be done are free, but rtx cost returns
+   the same for practically all of them.  So we weight the different types
+   of address here in the order (most pref first). */
+static int
+m68k_address_cost (rtx addr, bool speed ATTRIBUTE_UNUSED)
+{
+  DPRINTFA("Debug: %s\n", __FUNCTION__);
+	printf()
+  if (m68k_legitimate_base_reg_p (addr, false)) 
+    {
+	  return 1;
+    }
+  enum rtx_code code = GET_CODE (addr);
+  switch (code) 
+    {
+	  case PRE_DEC:
+	  case POST_INC:
+	  	printf("men vad kul!\n");
+	  	return 1;
+	  default:
+		  return 2;
     }
 }
 
