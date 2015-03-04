@@ -980,6 +980,9 @@ rtx m68k_function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode,
       /* FIXME: Two last conditions below are workarounds for bugs.  */
       else if (INTEGRAL_MODE_P (mode) && mode !=CQImode && mode != CHImode)
         {
+          len = (GET_MODE_SIZE (mode) + (UNITS_PER_WORD - 1)) / UNITS_PER_WORD;
+	  if (len == 1)
+	    {
           if (type && POINTER_TYPE_P (type))  // THIS
           {
             regbegin = 8; /* Ax */
@@ -990,7 +993,7 @@ rtx m68k_function_arg (CUMULATIVE_ARGS *cum, enum machine_mode mode,
             regbegin = 0; /* Dx */
 	    regend = regbegin + M68K_FASTCALL_DATA_PARM;
           }
-          len = (GET_MODE_SIZE (mode) + (UNITS_PER_WORD - 1)) / UNITS_PER_WORD;
+          }
         }
 
       if (regbegin != -1)

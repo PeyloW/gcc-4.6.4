@@ -532,7 +532,7 @@ Ld$div$0:
 |
 | All the routines are callable from C programs, and return the result 
 | in the register pair d0-d1. They also preserve all registers except 
-| d0-d1 and a0-a1.
+| d0-d2 and a0-a1.
 
 |=============================================================================
 |                              __subdf3
@@ -552,10 +552,10 @@ SYM (__subdf3):
 SYM (__adddf3):
 #ifndef __mcoldfire__
 	link	a6,IMM (0)	| everything will be done in registers
-	moveml	d3-d7/a3-a5,sp@-	| save all data registers and a3-a5 (but d0-d2)
+	moveml	d3-d7/a2-a5,sp@-	| save all data registers and a3-a5 (but d0-d2)
 #else
-	link	a6,IMM (-32)
-	moveml	d3-d7/a3-a5,sp@
+	link	a6,IMM (-36)
+	moveml	d3-d7/a2-a5,sp@
 #endif
 	movel	d0,a2
 	movel	d1,a3
@@ -1108,9 +1108,9 @@ Ladddf$a$small:
 	PICLEA	SYM (_fpCCR),a0
 	movew	IMM (0),a0@
 #ifndef __mcoldfire__
-	moveml	sp@+,d3-d7/a3-a5	| restore data registers
+	moveml	sp@+,d3-d7/a2-a5	| restore data registers
 #else
-	moveml	sp@,d3-d7/a3-a5
+	moveml	sp@,d3-d7/a2-a5
 	| XXX if frame pointer is ever removed, stack pointer must
 	| be adjusted here.
 #endif
@@ -1129,9 +1129,9 @@ Ladddf$b$small:
 	PICLEA	SYM (_fpCCR),a0
 	movew	IMM (0),a0@
 #ifndef __mcoldfire__
-	moveml	sp@+,d3-d7/a3-a5	| restore data registers
+	moveml	sp@+,d3-d7/a2-a5	| restore data registers
 #else
-	moveml	sp@,d3-d7/a3-a5
+	moveml	sp@,d3-d7/a2-a5
 	| XXX if frame pointer is ever removed, stack pointer must
 	| be adjusted here.
 #endif
@@ -1192,9 +1192,9 @@ Ladddf$ret:
 	movew	IMM (0),a0@
 	orl	d7,d0		| put sign bit back
 #ifndef __mcoldfire__
-	moveml	sp@+,d3-d7/a3-a5
+	moveml	sp@+,d3-d7/a2-a5
 #else
-	moveml	sp@,d3-d7/a3-a5
+	moveml	sp@,d3-d7/a2-a5
 	| XXX if frame pointer is ever removed, stack pointer must
 	| be adjusted here.
 #endif
@@ -2454,10 +2454,10 @@ SYM (__subsf3):
 SYM (__addsf3):
 |	DEBUG	14
 #ifndef __mcoldfire__
-	moveml	d3-d7/a3,sp@-	| save all data registers but d0-d1
+	moveml	d3-d7/a2-a3,sp@-	| save all data registers but d0-d1
 #else
-	lea	a6@(-24),a6	
-	moveml	d3-d7/a3,sp@
+	lea	a6@(-28),a6	
+	moveml	d3-d7/a2-a3,sp@
 #endif
 	movel	d0,a2		| store first operand
 	movel	d1,a3		| store second operand
@@ -2795,10 +2795,10 @@ Laddsf$a$small:
 	PICLEA	SYM (_fpCCR),a0
 	movew	IMM (0),a0@
 #ifndef __mcoldfire__
-	moveml	sp@+,d3-d7/a3	| restore data registers
+	moveml	sp@+,d3-d7/a2-a3	| restore data registers
 #else
-	moveml	sp@,d3-d7/a3
-	lea	a6@(24),a6	
+	moveml	sp@,d3-d7/a2-a3
+	lea	a6@(28),a6	
 	| XXX if frame pointer is ever removed, stack pointer must
 	| be adjusted here.
 #endif
@@ -2809,10 +2809,10 @@ Laddsf$b$small:
 	PICLEA	SYM (_fpCCR),a0
 	movew	IMM (0),a0@
 #ifndef __mcoldfire__
-	moveml	sp@+,d3-d7/a3	| restore data registers
+	moveml	sp@+,d3-d7/a2-a3	| restore data registers
 #else
-	moveml	sp@,d3-d7/a3
-	lea	a6@(24),a6	
+	moveml	sp@,d3-d7/a2-a3
+	lea	a6@(28),a6	
 	| XXX if frame pointer is ever removed, stack pointer must
 	| be adjusted here.
 #endif
@@ -2872,10 +2872,10 @@ Laddsf$ret:
 	movew	IMM (0),a0@
 	orl	d7,d0		| put sign bit
 #ifndef __mcoldfire__
-	moveml	sp@+,d3-d7/a3	| restore data registers
+	moveml	sp@+,d3-d7/a2-a3	| restore data registers
 #else
-	moveml	sp@,d3-d7/a3
-	lea	a6@(24),a6	
+	moveml	sp@,d3-d7/a2-a3
+	lea	a6@(28),a6	
 	| XXX if frame pointer is ever removed, stack pointer must
 	| be adjusted here.
 #endif
@@ -2941,10 +2941,10 @@ Laddsf$nf:
 SYM (__mulsf3):
 |	DEBUG	15
 #ifndef __mcoldfire__
-	moveml	d3-d7/a3,sp@-
+	moveml	d3-d7/a2-a3,sp@-
 #else
-	lea	a6@(-24),a6	
-	moveml	d3-d7/a3,sp@
+	lea	a6@(-28),a6	
+	moveml	d3-d7/a2-a3,sp@
 #endif
 	movel	d0,a2		| store a into a0
 	movel	d1,a3		| store b into a1
@@ -3108,10 +3108,10 @@ Lmulsf$a$0:
 	PICLEA	SYM (_fpCCR),a0	|
 	movew	IMM (0),a0@	| 
 #ifndef __mcoldfire__
-	moveml	sp@+,d3-d7/a3	| 
+	moveml	sp@+,d3-d7/a2-a3	| 
 #else
-	moveml	sp@,d3-d7/a3
-	lea	a6@(24),a6	
+	moveml	sp@,d3-d7/a2-a3
+	lea	a6@(28),a6	
 	| XXX if frame pointer is ever removed, stack pointer must
 	| be adjusted here.
 #endif
